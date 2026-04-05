@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackFalconData | Structured Web Data</title>
+  <meta name="description" content="BlackFalconData builds reliable scrapers, APIs, monitoring workflows, and automation tools that turn public web data into usable business value." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:         #0a0c10;
+      --bg-2:       #0e1118;
+      --glass:      rgba(255,255,255,0.03);
+      --glass-2:    rgba(255,255,255,0.05);
+      --border:     rgba(255,255,255,0.08);
+      --border-h:   rgba(100,180,255,0.28);
+      --blue:       #64b4ff;
+      --blue-dim:   rgba(100,180,255,0.12);
+      --blue-glow:  rgba(100,180,255,0.06);
+      --text:       #e2e8f0;
+      --text-2:     #94a3b8;
+      --text-3:     #4b5563;
+      --mono:       'JetBrains Mono', monospace;
+      --sans:       'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Canvas background ─────────────────────────────────── */
+    #canvas {
+      position: fixed;
+      inset: 0; z-index: 0;
+      pointer-events: none;
+    }
+
+    .wrap { position: relative; z-index: 1; }
+
+    /* ── Header ────────────────────────────────────────────── */
+    header {
+      height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6%;
+      position: fixed; top: 0; width: 100%; z-index: 200;
+      background: rgba(10,12,16,0.75);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+    header::after {
+      content: '';
+      position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--blue) 40%, transparent 100%);
+      opacity: 0.18;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 11px;
+      text-decoration: none;
+    }
+    .logo img {
+      height: 30px; width: auto;
+      filter: brightness(0) invert(1);
+    }
+    .logo-text {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: -0.03em; color: var(--text);
+    }
+    nav ul { list-style: none; display: flex; gap: 36px; }
+    nav a {
+      text-decoration: none; color: var(--text-2);
+      font-size: 0.875rem; font-weight: 500;
+      transition: color .2s;
+    }
+    nav a:hover { color: var(--text); }
+    .btn-header {
+      background: var(--glass-2);
+      border: 1px solid var(--border);
+      color: var(--text); font-family: var(--sans);
+      font-size: 0.82rem; font-weight: 600;
+      padding: 9px 22px; cursor: pointer;
+      border-radius: 4px;
+      transition: background .2s, border-color .2s, color .2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-header:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #000;
+    }
+
+    /* ── Section base ──────────────────────────────────────── */
+    section { padding: 120px 10% 80px; }
+    .mono-label {
+      font-family: var(--mono);
+      font-size: 0.72rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--blue);
+      display: block; margin-bottom: 18px;
+    }
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700; letter-spacing: -0.03em;
+      margin-bottom: 56px; line-height: 1.12;
+    }
+
+    /* ── HERO ──────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding-top: 72px;
+    }
+    .hero h1 {
+      font-size: clamp(2.6rem, 6vw, 4.8rem);
+      font-weight: 700; line-height: 1.08;
+      letter-spacing: -0.04em;
+      max-width: 880px; margin-bottom: 28px;
+      background: linear-gradient(160deg, #ffffff 30%, rgba(255,255,255,0.55));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.15rem; color: var(--text-2); font-weight: 300;
+      max-width: 580px; margin-bottom: 44px; line-height: 1.8;
+    }
+    .hero-btns { display: flex; align-items: center; gap: 0; }
+    .btn-solid {
+      background: #fff; color: #000;
+      font-family: var(--sans); font-size: 0.9rem; font-weight: 600;
+      padding: 14px 32px; border: none; cursor: pointer;
+      border-radius: 4px;
+      transition: background .2s, transform .15s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-solid:hover { background: var(--blue); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-2); font-family: var(--sans);
+      font-size: 0.9rem; font-weight: 500;
+      padding: 14px 32px; cursor: pointer; margin-left: 16px;
+      border-radius: 4px;
+      transition: border-color .2s, color .2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--text); }
+
+    /* Hero stats strip */
+    .hero-stats {
+      display: flex; gap: 0; margin-top: 72px;
+      border-top: 1px solid var(--border);
+      padding-top: 0;
+    }
+    .hstat {
+      padding: 32px 48px 0 0;
+      border-right: 1px solid var(--border);
+      margin-right: 48px;
+    }
+    .hstat:last-child { border-right: none; margin-right: 0; }
+    .hstat-val {
+      display: block; font-family: var(--mono);
+      font-size: 2rem; font-weight: 400;
+      color: #fff; letter-spacing: -0.04em; line-height: 1;
+    }
+    .hstat-label {
+      display: block; font-size: 0.72rem; font-weight: 500;
+      color: var(--text-3); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-top: 8px;
+    }
+
+    /* ── CAPABILITIES ──────────────────────────────────────── */
+    #capabilities { background: var(--bg-2); border-top: 1px solid var(--border); }
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px; background: var(--border);
+    }
+    .cap-card {
+      background: var(--bg-2);
+      padding: 40px;
+      position: relative; overflow: hidden;
+      transition: background .25s;
+    }
+    .cap-card:hover { background: rgba(100,180,255,0.03); }
+    .cap-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: var(--blue); opacity: 0;
+      transition: opacity .25s;
+    }
+    .cap-card:hover::before { opacity: 0.5; }
+    .cap-num {
+      font-family: var(--mono);
+      font-size: 0.68rem; color: var(--text-3);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      display: block; margin-bottom: 20px;
+    }
+    .cap-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; }
+    .cap-card p { color: var(--text-2); font-size: 0.9rem; line-height: 1.7; }
+
+    /* ── SOLUTIONS ─────────────────────────────────────────── */
+    #solutions { border-top: 1px solid var(--border); }
+    .sol-row {
+      display: flex; align-items: stretch; gap: 80px;
+      margin-bottom: 80px;
+    }
+    .sol-row:last-child { margin-bottom: 0; }
+    .sol-row:nth-child(even) { flex-direction: row-reverse; }
+    .sol-text { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .sol-text h3 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .sol-text p { color: var(--text-2); font-size: 0.95rem; line-height: 1.75; margin-bottom: 24px; }
+    .sol-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sol-tag {
+      font-family: var(--mono); font-size: 0.68rem; font-weight: 400;
+      color: var(--blue);
+      background: var(--blue-dim);
+      border: 1px solid rgba(100,180,255,0.2);
+      padding: 3px 10px; border-radius: 2px;
+      letter-spacing: 0.06em;
+    }
+
+    .sol-visual {
+      flex: 1.2; height: 340px;
+      background: linear-gradient(135deg, var(--glass), var(--blue-glow));
+      border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .sol-visual::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, var(--bg) 100%);
+      z-index: 1; pointer-events: none;
+    }
+    .stream {
+      position: absolute; inset: 0;
+      padding: 20px 24px; overflow: hidden;
+      font-family: var(--mono); font-size: 10px;
+      display: flex; flex-direction: column; gap: 8px;
+      color: var(--text-3);
+    }
+
+    /* ── WHY ───────────────────────────────────────────────── */
+    #why { background: var(--bg-2); border-top: 1px solid var(--border); }
+    .why-wrap {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 100px; align-items: start;
+    }
+    .why-text h2 { margin-bottom: 20px; }
+    .why-text p { color: var(--text-2); font-size: 0.95rem; line-height: 1.8; margin-bottom: 32px; }
+    .why-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border);
+    }
+    .wstat {
+      background: var(--bg-2);
+      padding: 36px 32px;
+      transition: background .2s;
+    }
+    .wstat:hover { background: rgba(100,180,255,0.03); }
+    .wstat-val {
+      display: block; font-family: var(--mono);
+      font-size: 2.4rem; font-weight: 400;
+      color: #fff; letter-spacing: -0.04em; line-height: 1;
+    }
+    .wstat-label {
+      display: block; font-size: 0.72rem; font-weight: 500;
+      color: var(--text-3); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-top: 10px;
+    }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    footer {
+      padding: 80px 10% 40px;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.3);
+    }
+    .foot-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px; margin-bottom: 60px;
+    }
+    .foot-brand img {
+      height: 28px; filter: brightness(0) invert(1); opacity: 0.7;
+      margin-bottom: 14px; display: block;
+    }
+    .foot-brand p {
+      color: var(--text-3); font-size: 0.875rem; line-height: 1.7;
+      max-width: 260px;
+    }
+    .foot-col h4 {
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-3); margin-bottom: 20px;
+    }
+    .foot-col ul { list-style: none; }
+    .foot-col li { margin-bottom: 12px; }
+    .foot-col a {
+      text-decoration: none; color: var(--text-2);
+      font-size: 0.875rem; transition: color .2s;
+    }
+    .foot-col a:hover { color: var(--text); }
+    .foot-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      border-top: 1px solid var(--border); padding-top: 28px;
+    }
+    .foot-copy { font-family: var(--mono); font-size: 0.7rem; color: var(--text-3); }
+    .foot-status {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--text-3);
+    }
+    .status-ok { color: #34d399; }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .sol-row, .sol-row:nth-child(even) { flex-direction: column; gap: 32px; }
+      .sol-visual { flex: none; height: 260px; }
+      .why-wrap { grid-template-columns: 1fr; gap: 48px; }
+      .foot-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      nav ul { display: none; }
+      section { padding: 80px 6% 56px; }
+      .hero-stats { flex-wrap: wrap; }
+      .foot-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="wrap">
+
+  <!-- ── HEADER ──────────────────────────────────────────────── -->
+  <header>
+    <a href="#" class="logo">
+      <img src="./logo.png" alt="BlackFalconData" />
+      <span class="logo-text">BlackFalconData</span>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="#capabilities">Capabilities</a></li>
+        <li><a href="#solutions">Solutions</a></li>
+        <li><a href="#why">Infrastructure</a></li>
+        <li><a href="mailto:hello@blackfalcondata.com">Contact</a></li>
+      </ul>
+    </nav>
+    <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-header">
+      Browse actors &rarr;
+    </a>
+  </header>
+
+  <!-- ── HERO ────────────────────────────────────────────────── -->
+  <section class="hero">
+    <span class="mono-label">// PRECISE EXTRACTION ENGINE</span>
+    <h1>Structured web data<br>for real business use.</h1>
+    <p>BlackFalconData builds reliable scrapers, APIs, monitoring workflows, and automation tools that turn public web data into usable business value.</p>
+    <div class="hero-btns">
+      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-solid">
+        Explore products
+      </a>
+      <a href="mailto:hello@blackfalcondata.com" class="btn-ghost">Get in touch</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat">
+        <span class="hstat-val">50+</span>
+        <span class="hstat-label">Active scrapers</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-val">40+</span>
+        <span class="hstat-label">Countries covered</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-val">24/7</span>
+        <span class="hstat-label">Canary monitoring</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-val">PPE</span>
+        <span class="hstat-label">Pay per result</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CAPABILITIES ────────────────────────────────────────── -->
+  <section id="capabilities">
+    <span class="mono-label">01 // CORE CAPABILITIES</span>
+    <h2>Ingest. Normalize. Deliver.</h2>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <span class="cap-num">01. Extraction</span>
+        <h3>Precision Scrapers</h3>
+        <p>50+ production actors for job boards, automotive platforms, real estate portals, and classifieds — with normalized output and daily health monitoring.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-num">02. Integration</span>
+        <h3>Data APIs</h3>
+        <p>Clean, versioned REST endpoints over the data you need. Consistent schemas, pay-per-result billing, and zero idle compute costs.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-num">03. Resilience</span>
+        <h3>Canary Monitoring</h3>
+        <p>Every actor has a dedicated health monitor running on a daily schedule. Site changes are caught before your pipeline fails — not after.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-num">04. Intelligence</span>
+        <h3>AI-Ready Output</h3>
+        <p>MCP-compatible schemas, compact output mode, and incremental change tracking. Built for LLM pipelines and AI agents from day one.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SOLUTIONS ────────────────────────────────────────────── -->
+  <section id="solutions">
+    <span class="mono-label">02 // FEATURED SOLUTIONS</span>
+
+    <div class="sol-row">
+      <div class="sol-text">
+        <span class="mono-label">CASE_01</span>
+        <h3>Global Job Board Extraction</h3>
+        <p>Structured job listings from 40+ boards across 40+ countries — salary, contact data, full descriptions, and incremental change tracking. Normalized output across every source, zero schema drift.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">StepStone</span>
+          <span class="sol-tag">Indeed</span>
+          <span class="sol-tag">Reed</span>
+          <span class="sol-tag">Naukri</span>
+          <span class="sol-tag">SEEK</span>
+          <span class="sol-tag">Monster</span>
+          <span class="sol-tag">+34 more</span>
+        </div>
+      </div>
+      <div class="sol-visual">
+        <div class="stream" id="stream-1"></div>
+      </div>
+    </div>
+
+    <div class="sol-row">
+      <div class="sol-text">
+        <span class="mono-label">CASE_02</span>
+        <h3>Marketplace &amp; Listing Intelligence</h3>
+        <p>Used car listings, property data, and classified ads — extracted and normalized from Europe's leading platforms. Price history, spec data, dealer profiles, and cross-portal deduplication built in.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">AutoScout24</span>
+          <span class="sol-tag">Bilbasen</span>
+          <span class="sol-tag">Immowelt</span>
+          <span class="sol-tag">Idealista</span>
+          <span class="sol-tag">DBA</span>
+          <span class="sol-tag">Willhaben</span>
+        </div>
+      </div>
+      <div class="sol-visual">
+        <div class="stream" id="stream-2"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── WHY ──────────────────────────────────────────────────── -->
+  <section id="why">
+    <span class="mono-label">03 // WHY BLACKFALCONDATA</span>
+    <div class="why-wrap">
+      <div class="why-text">
+        <h2>The infrastructure for<br>reliable intelligence.</h2>
+        <p>Most scraping projects fail due to maintenance debt — sites change, schemas drift, bot protection evolves. BlackFalconData manages the full lifecycle so you only receive clean, structured data your pipelines can depend on.</p>
+        <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-header" style="display:inline-block;">
+          Browse all 50+ actors &rarr;
+        </a>
+      </div>
+      <div class="why-stats">
+        <div class="wstat">
+          <span class="wstat-val">50+</span>
+          <span class="wstat-label">Active actors</span>
+        </div>
+        <div class="wstat">
+          <span class="wstat-val">40+</span>
+          <span class="wstat-label">Countries</span>
+        </div>
+        <div class="wstat">
+          <span class="wstat-val">24/7</span>
+          <span class="wstat-label">Uptime checks</span>
+        </div>
+        <div class="wstat">
+          <span class="wstat-val">PPE</span>
+          <span class="wstat-label">Pay per result</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────── -->
+  <footer>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <img src="./logo.png" alt="BlackFalconData" />
+        <p>Building the bridge between the raw web and usable business intelligence — one structured feed at a time.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Products</h4>
+        <ul>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Job board scrapers</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Automotive data</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Real estate</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Marketplace feeds</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Apify Store</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">API reference</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Pricing</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">MCP integration</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="mailto:hello@blackfalcondata.com">Contact</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Apify profile</a></li>
+          <li><a href="https://blackfalcondata.com">blackfalcondata.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="foot-copy">&copy; 2025 BlackFalconData. All rights reserved.</span>
+      <span class="foot-status">
+        SYSTEM_STATUS: <span class="status-ok">OPERATIONAL</span>
+        &nbsp;&nbsp;//&nbsp;&nbsp;
+        <span id="clock">00:00:00</span> UTC
+      </span>
+    </div>
+  </footer>
+
+</div><!-- /.wrap -->
+
+<script>
+/* ── Canvas particle network ─────────────────────────────────── */
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+const COUNT  = 75;
+const DIST   = 180;
+let W, H, particles = [];
+
+// Slightly more particles spawn on the right 60% of the canvas
+function mkParticle() {
+  const rightBias = Math.random() < 0.6;
+  return {
+    x:    rightBias ? W * 0.4 + Math.random() * W * 0.6 : Math.random() * W * 0.65,
+    y:    Math.random() * H,
+    vx:   (Math.random() - 0.5) * 0.35,
+    vy:   (Math.random() - 0.5) * 0.35,
+    size: Math.random() * 1.5 + 0.8,
+    opacity: Math.random() * 0.5 + 0.3,
+  };
+}
+
+function init() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  particles = Array.from({ length: COUNT }, mkParticle);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > W) p.vx *= -1;
+    if (p.y < 0 || p.y > H) p.vy *= -1;
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(100,180,255,${p.opacity})`;
+    ctx.fill();
+
+    // Connections
+    for (let j = i + 1; j < particles.length; j++) {
+      const q  = particles[j];
+      const dx = p.x - q.x, dy = p.y - q.y;
+      const d  = Math.sqrt(dx * dx + dy * dy);
+      if (d < DIST) {
+        const alpha = (1 - d / DIST) * 0.12;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.strokeStyle = `rgba(100,180,255,${alpha})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', init);
+init(); draw();
+
+/* ── Data stream effect ──────────────────────────────────────── */
+const streams = {
+  'stream-1': [
+    'BOARD:stepstone.de  >> 12,441 results  >> FETCH_OK',
+    'BOARD:reed.co.uk    >> 8,203 results   >> FETCH_OK',
+    'BOARD:indeed.com    >> 19,882 results  >> FETCH_OK',
+    'BOARD:naukri.com    >> 47,310 results  >> FETCH_OK',
+    'BOARD:seek.com.au   >> 9,114 results   >> FETCH_OK',
+    'FIELD:salary_min    >> 1,834 populated >> MAPPED',
+    'FIELD:contactEmail  >> 642 populated   >> MAPPED',
+    'FIELD:isRemote      >> 4,201 populated >> MAPPED',
+    'DEDUP:cross-page    >> 0 duplicates    >> CLEAN',
+    'CANARY:stepstone    >> 204ms latency   >> PASS',
+    'CANARY:reed         >> 188ms latency   >> PASS',
+    'INCR:state_delta    >> 311 new jobs    >> WRITTEN',
+    'SCHEMA:v2.1.4       >> 48 fields       >> VALID',
+    'BOARD:glassdoor.com >> 5,509 results   >> FETCH_OK',
+    'BOARD:monster.com   >> 7,882 results   >> FETCH_OK',
+    'PPE:start_event     >> charged         >> OK',
+    'PPE:result_event    >> x 8,203         >> OK',
+    'BOARD:dice.com      >> 3,911 results   >> FETCH_OK',
+    'FIELD:description   >> 8,201 populated >> MAPPED',
+    'CANARY:naukri       >> 241ms latency   >> PASS',
+  ],
+  'stream-2': [
+    'PORTAL:autoscout24  >> 34,112 listings >> FETCH_OK',
+    'PORTAL:bilbasen.dk  >> 18,774 listings >> FETCH_OK',
+    'PORTAL:immowelt.de  >> 22,098 listings >> FETCH_OK',
+    'PORTAL:idealista.es >> 41,330 listings >> FETCH_OK',
+    'FIELD:price_eur     >> 34,100 populated >> MAPPED',
+    'FIELD:mileage_km    >> 18,320 populated >> MAPPED',
+    'FIELD:dealer_id     >> 14,882 populated >> MAPPED',
+    'DEDUP:vin_hash      >> 12 dupes removed >> CLEAN',
+    'PORTAL:dba.dk       >> 9,441 listings   >> FETCH_OK',
+    'CANARY:autoscout    >> 198ms latency    >> PASS',
+    'PORTAL:willhaben.at >> 28,003 listings  >> FETCH_OK',
+    'FIELD:year          >> 33,990 populated >> MAPPED',
+    'FIELD:fuel_type     >> 18,003 populated >> MAPPED',
+    'INCR:state_delta    >> 2,441 changed    >> WRITTEN',
+    'SCHEMA:v1.8.2       >> 52 fields        >> VALID',
+    'CANARY:bilbasen     >> 212ms latency    >> PASS',
+    'PPE:start_event     >> charged          >> OK',
+    'PPE:result_event    >> x 34,112         >> OK',
+    'PORTAL:mobile.de    >> 55,890 listings  >> FETCH_OK',
+    'FIELD:contactPhone  >> 8,112 populated  >> MAPPED',
+  ],
+};
+
+function initStream(id) {
+  const el   = document.getElementById(id);
+  const pool = streams[id];
+  let idx    = 0;
+
+  // Seed with initial lines
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement('div');
+    d.textContent = pool[(idx++) % pool.length];
+    d.style.opacity = (0.2 + Math.random() * 0.45).toFixed(2);
+    el.appendChild(d);
+  }
+
+  setInterval(() => {
+    el.removeChild(el.firstChild);
+    const d = document.createElement('div');
+    d.textContent = pool[(idx++) % pool.length];
+    d.style.opacity = (0.5 + Math.random() * 0.4).toFixed(2);
+    el.appendChild(d);
+  }, 480);
+}
+
+initStream('stream-1');
+initStream('stream-2');
+
+/* ── UTC clock ───────────────────────────────────────────────── */
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    [n.getUTCHours(), n.getUTCMinutes(), n.getUTCSeconds()]
+      .map(v => String(v).padStart(2,'0')).join(':');
+}
+setInterval(tick, 1000); tick();
+</script>
+
+</body>
+</html>
