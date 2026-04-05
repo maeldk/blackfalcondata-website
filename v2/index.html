@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Black Falcon Data — Structured Data Feeds</title>
+  <meta name="description" content="Ready-to-use data scrapers for the world's leading job boards, automotive, and real estate platforms." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:          #0a0908;
+      --bg-2:        #0f0d0c;
+      --surface:     #141210;
+      --surface-2:   #1a1714;
+      --rust:        #a44a3f;
+      --rust-dim:    rgba(164, 74, 63, 0.18);
+      --rust-border: rgba(164, 74, 63, 0.35);
+      --copper:      #d4a373;
+      --copper-dim:  rgba(212, 163, 115, 0.12);
+      --oxide:       #4f6d7a;
+      --teal:        #c0d6df;
+      --filament:    rgba(255, 69, 0, 0.4);
+      --text:        #e8e6e3;
+      --text-2:      #8a8480;
+      --text-3:      #4d4845;
+      --border:      rgba(255, 255, 255, 0.055);
+      --border-2:    rgba(255, 255, 255, 0.09);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain ─────────────────────────────────────────────── */
+    .grain {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 200;
+      opacity: 0.12;
+      filter: url(#grain);
+    }
+
+    /* ── Filament webbing ───────────────────────────────────── */
+    #webbing {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+      overflow: hidden;
+    }
+    .filament {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, var(--copper), var(--rust), transparent);
+      height: 1px; width: 100%;
+      opacity: 0;
+      box-shadow: 0 0 8px var(--filament);
+      animation: flow linear infinite;
+    }
+    @keyframes flow {
+      0%   { transform: translateX(-100%); opacity: 0; }
+      15%  { opacity: 0.18; }
+      85%  { opacity: 0.12; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* ── Animations ─────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.3; transform: scale(1.6); }
+    }
+    @keyframes bar-grow {
+      from { width: 0; }
+    }
+
+    .a1 { animation: fadeUp .6s ease .05s both; }
+    .a2 { animation: fadeUp .6s ease .18s both; }
+    .a3 { animation: fadeUp .6s ease .30s both; }
+    .a4 { animation: fadeUp .6s ease .44s both; }
+
+    /* ── NAV ────────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10, 9, 8, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, var(--rust), var(--copper), transparent);
+      opacity: 0.7;
+    }
+    .nav-inner {
+      max-width: 1160px; margin: 0 auto; padding: 0 32px;
+      height: 60px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo img {
+      height: 34px; width: auto;
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
+    }
+    .nav-right { display: flex; align-items: center; gap: 32px; }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-2); text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .btn-nav {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--rust);
+      background: var(--rust-dim);
+      border: 1px solid var(--rust-border);
+      padding: 7px 16px;
+      text-decoration: none;
+      transition: background .2s, color .2s;
+    }
+    .btn-nav:hover { background: rgba(164,74,63,.3); color: var(--copper); }
+
+    /* ── HERO ───────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: flex; align-items: center;
+      padding: 80px 32px;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .hero-bg-grid {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(164,74,63,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(164,74,63,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 70% 80% at 80% 50%, black 0%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 80% at 80% 50%, black 0%, transparent 70%);
+    }
+    .hero-glow {
+      position: absolute; right: 10%; top: 30%;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(164,74,63,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 1160px; margin: 0 auto; width: 100%;
+    }
+    .hero-kicker {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--oxide);
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-kicker::before { content: '//'; color: var(--rust); }
+    .hero h1 {
+      font-size: clamp(3.2rem, 9vw, 7.5rem);
+      font-weight: 900;
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      color: var(--text);
+      max-width: 900px;
+      margin-bottom: 36px;
+    }
+    .hero h1 .oxide { color: var(--oxide); }
+    .hero h1 .rust  { color: var(--rust);  }
+    .hero-rule {
+      width: 60px; height: 3px;
+      background: linear-gradient(90deg, var(--rust), var(--copper));
+      margin-bottom: 32px;
+    }
+    .hero-sub {
+      font-size: 15px; color: var(--text-2); line-height: 1.8;
+      max-width: 480px; margin-bottom: 52px;
+      border-left: 2px solid var(--rust-border);
+      padding-left: 20px;
+    }
+    .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+    .btn-primary {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--bg); background: var(--rust);
+      padding: 14px 28px;
+      text-decoration: none;
+      transition: background .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--copper); transform: translateY(-2px); }
+    .btn-ghost {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-2);
+      border: 1px solid var(--border-2);
+      padding: 14px 28px;
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--rust-border); color: var(--teal); }
+
+    /* Hero telemetry strip */
+    .hero-tele {
+      position: absolute; bottom: 40px; right: 32px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.12em;
+      color: var(--text-3); text-align: right; line-height: 2;
+    }
+    .status-dot {
+      display: inline-block; width: 5px; height: 5px;
+      background: var(--rust); border-radius: 50%;
+      animation: pulse 2s infinite;
+      margin-right: 6px; vertical-align: middle;
+    }
+
+    /* ── STATS ──────────────────────────────────────────────── */
+    .stats {
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+    }
+    .stats-inner {
+      max-width: 1160px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+    }
+    .stat-item {
+      padding: 44px 32px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      display: block;
+      font-size: 2.8rem; font-weight: 900;
+      color: var(--rust); letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .stat-num sup { font-size: 1.4rem; }
+    .stat-label {
+      display: block; margin-top: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* ── SECTION SHELL ──────────────────────────────────────── */
+    .section { padding: 96px 32px; position: relative; }
+    .section-alt { background: var(--bg-2); }
+    .wrap { max-width: 1160px; margin: 0 auto; }
+    .section-head { margin-bottom: 60px; }
+    .kicker {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--rust); margin-bottom: 16px;
+    }
+    .kicker::before { content: '// '; opacity: 0.5; }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      font-weight: 900; letter-spacing: -0.03em; text-transform: uppercase;
+      color: var(--text); line-height: 0.95;
+      margin-bottom: 20px;
+    }
+    .section-sub {
+      font-size: 14px; color: var(--text-2); line-height: 1.8;
+      max-width: 480px;
+      border-left: 2px solid var(--border-2);
+      padding-left: 18px;
+    }
+
+    /* ── CATEGORIES ─────────────────────────────────────────── */
+    .cat-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1px; background: var(--border);
+    }
+    .cat-card {
+      background: var(--bg-2);
+      padding: 36px 32px;
+      position: relative; overflow: hidden;
+      transition: background .2s;
+      cursor: default;
+    }
+    .cat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+      background: var(--rust); opacity: 0;
+      transition: opacity .2s;
+    }
+    .cat-card:hover { background: var(--surface); }
+    .cat-card:hover::before { opacity: 1; }
+    .cat-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.16em; color: var(--text-3);
+      margin-bottom: 24px; text-transform: uppercase;
+    }
+    .cat-emoji { font-size: 1.6rem; display: block; margin-bottom: 16px; }
+    .cat-card h3 {
+      font-size: 15px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--text);
+      margin-bottom: 12px;
+    }
+    .cat-card p { font-size: 13px; color: var(--text-2); line-height: 1.7; }
+    .cat-badge {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.1em;
+      color: var(--copper);
+      border: 1px solid rgba(212,163,115,0.25);
+      padding: 3px 10px;
+      margin-top: 20px;
+    }
+
+    /* ── NODE BAR (stats-style for cat metrics) ─────────────── */
+    .node-bar-track {
+      height: 2px; background: var(--border-2); margin-top: 18px;
+    }
+    .node-bar-fill {
+      height: 100%; background: var(--rust);
+      box-shadow: 0 0 8px var(--rust);
+      animation: bar-grow 1.5s cubic-bezier(0.19,1,0.22,1) both;
+    }
+
+    /* ── REGION BOARDS ──────────────────────────────────────── */
+    .region-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1px; background: var(--border);
+    }
+    .region-card {
+      background: var(--bg-2);
+      padding: 32px;
+      transition: background .2s;
+    }
+    .region-card:hover { background: var(--surface); }
+    .region-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .region-flag { font-size: 1.2rem; }
+    .region-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--teal);
+    }
+    .board-list { list-style: none; display: flex; flex-direction: column; gap: 13px; }
+    .board-list li {
+      display: flex; align-items: baseline; gap: 10px;
+      font-family: 'Space Mono', monospace;
+    }
+    .board-list li::before {
+      content: '›'; color: var(--rust); font-size: 14px; flex-shrink: 0;
+    }
+    .board-name { font-size: 12px; color: var(--text); }
+    .board-desc { font-size: 11px; color: var(--text-3); }
+
+    /* ── FEATURES ────────────────────────────────────────────── */
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1px; background: var(--border);
+    }
+    .feat-card {
+      background: var(--bg-2);
+      padding: 36px 32px;
+      position: relative;
+      transition: background .2s;
+    }
+    .feat-card:hover { background: var(--surface); }
+    .feat-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 32px; right: 32px; height: 1px;
+      background: transparent;
+      transition: background .2s;
+    }
+    .feat-card:hover::after { background: var(--rust-border); }
+    .feat-idx {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.14em; color: var(--text-3);
+      margin-bottom: 28px;
+    }
+    .feat-icon { font-size: 1.5rem; display: block; margin-bottom: 16px; }
+    .feat-card h3 {
+      font-size: 13px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text);
+      margin-bottom: 12px;
+    }
+    .feat-card p { font-size: 13px; color: var(--text-2); line-height: 1.75; }
+
+    /* ── CTA ─────────────────────────────────────────────────── */
+    .cta {
+      padding: 96px 32px;
+      border-top: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .cta::before {
+      content: '';
+      position: absolute; top: -1px; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--rust), var(--copper), transparent);
+      opacity: 0.6;
+    }
+    .cta-inner {
+      max-width: 680px; margin: 0 auto; text-align: center;
+    }
+    .cta-inner .kicker { justify-content: center; display: block; }
+    .cta-inner h2 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 900; letter-spacing: -0.03em; text-transform: uppercase;
+      color: var(--text); margin-bottom: 18px;
+    }
+    .cta-inner p { font-size: 14px; color: var(--text-2); margin-bottom: 44px; }
+    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      background: var(--bg); border-top: 1px solid var(--border);
+      padding: 32px;
+    }
+    .foot-inner {
+      max-width: 1160px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .foot-left { display: flex; align-items: center; gap: 14px; }
+    .foot-left img {
+      height: 26px; filter: brightness(0) invert(1); opacity: 0.5;
+    }
+    .foot-left span {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--text-3); letter-spacing: 0.06em;
+    }
+    .foot-right {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--text-3);
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .stats-inner { grid-template-columns: repeat(2, 1fr); }
+      .stat-item:nth-child(2) { border-right: none; }
+      .stat-item:nth-child(3), .stat-item:nth-child(4) {
+        border-top: 1px solid var(--border);
+      }
+      .nav-links { display: none; }
+      .hero h1 { font-size: 3rem; }
+      .hero-tele { display: none; }
+      .section { padding: 72px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SVG grain filter -->
+<svg style="display:none">
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+    <feColorMatrix type="saturate" values="0" />
+  </filter>
+</svg>
+<div class="grain"></div>
+<div id="webbing"></div>
+
+<!-- ── NAV ──────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" aria-label="Black Falcon Data">
+      <img src="./logo.png" alt="Black Falcon Data" style="height:34px;" />
+    </a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#products">Products</a>
+        <a href="#features">Features</a>
+      </div>
+      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-nav">
+        Browse Actors &rarr;
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker a1">Data extraction infrastructure</div>
+    <h1 class="a2">
+      Structured<br>
+      <span class="oxide">data</span><br>
+      <span class="rust">feeds</span>
+    </h1>
+    <div class="hero-rule a3"></div>
+    <p class="hero-sub a3">
+      Ready-to-use Apify actors delivering clean, normalized data — from global
+      job portals to automotive and real estate platforms. One integration,
+      consistent output across 50+ scrapers.
+    </p>
+    <div class="hero-ctas a4">
+      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-primary">
+        Browse all actors &rarr;
+      </a>
+      <a href="#products" class="btn-ghost">See what we cover</a>
+    </div>
+  </div>
+  <div class="hero-tele">
+    <span class="status-dot"></span>LIVE_TELEMETRY_ACTIVE<br>
+    ACTORS: 50+ &nbsp;|&nbsp; REGIONS: 40+<br>
+    CANARY: MONITORING<br>
+    [ <span id="clock">00:00:00</span> UTC ]
+  </div>
+</div>
+
+<!-- ── STATS ─────────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <span class="stat-num">50<sup>+</sup></span>
+      <span class="stat-label">Active scrapers</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">40<sup>+</sup></span>
+      <span class="stat-label">Countries covered</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">24/7</span>
+      <span class="stat-label">Canary monitoring</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">PPE</span>
+      <span class="stat-label">Pay per result</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── CATEGORIES ────────────────────────────────────────────── -->
+<div class="section" id="products">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">What we cover</div>
+      <h2 class="section-title">Four<br>verticals</h2>
+      <p class="section-sub">Every actor delivers normalized, structured output with consistent field names — built for pipelines, AI agents, and MCP workflows.</p>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-num">NODE_01</div>
+        <span class="cat-emoji">💼</span>
+        <h3>Job Intelligence</h3>
+        <p>Global and regional job boards — Europe, North America, APAC, LATAM, Middle East. Full descriptions, salary, contact data, incremental tracking.</p>
+        <div class="node-bar-track"><div class="node-bar-fill" style="width:82%"></div></div>
+        <span class="cat-badge">40+ job boards</span>
+      </div>
+      <div class="cat-card">
+        <div class="cat-num">NODE_02</div>
+        <span class="cat-emoji">🚗</span>
+        <h3>Automotive</h3>
+        <p>Used car listings from Europe's largest automotive marketplaces — price history, specs, dealer data, and cross-portal deduplication.</p>
+        <div class="node-bar-track"><div class="node-bar-fill" style="width:31%"></div></div>
+        <span class="cat-badge">4 portals</span>
+      </div>
+      <div class="cat-card">
+        <div class="cat-num">NODE_03</div>
+        <span class="cat-emoji">🏠</span>
+        <h3>Real Estate</h3>
+        <p>Property listings with geo-precision, price trends, and contact enrichment from leading European real estate platforms.</p>
+        <div class="node-bar-track"><div class="node-bar-fill" style="width:18%"></div></div>
+        <span class="cat-badge">2 portals</span>
+      </div>
+      <div class="cat-card">
+        <div class="cat-num">NODE_04</div>
+        <span class="cat-emoji">🛒</span>
+        <h3>Classifieds &amp; Freelance</h3>
+        <p>General classifieds, second-hand marketplaces, and freelance platforms — structured product and gig data at scale.</p>
+        <div class="node-bar-track"><div class="node-bar-fill" style="width:31%"></div></div>
+        <span class="cat-badge">4 portals</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── JOB BOARDS ─────────────────────────────────────────────── -->
+<div class="section section-alt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Job board coverage</div>
+      <h2 class="section-title">40+ portals<br>every market</h2>
+      <p class="section-sub">From official government employment services to the world's largest private job boards — with normalized output across all of them.</p>
+    </div>
+    <div class="region-grid">
+
+      <div class="region-card">
+        <div class="region-header">
+          <span class="region-flag">🇩🇪</span>
+          <span class="region-name">DACH</span>
+        </div>
+        <ul class="board-list">
+          <li><span class="board-name">StepStone</span>&nbsp;<span class="board-desc">Germany's #1 job board</span></li>
+          <li><span class="board-name">Xing</span>&nbsp;<span class="board-desc">Professional network &amp; jobs</span></li>
+          <li><span class="board-name">Arbeitsagentur</span>&nbsp;<span class="board-desc">Official DE employment portal</span></li>
+          <li><span class="board-name">Jobs.ch &amp; Jobup.ch</span>&nbsp;<span class="board-desc">Switzerland's top portals</span></li>
+          <li><span class="board-name">Karriere.at</span>&nbsp;<span class="board-desc">Austria's leading job board</span></li>
+        </ul>
+      </div>
+
+      <div class="region-card">
+        <div class="region-header">
+          <span class="region-flag">🇬🇧</span>
+          <span class="region-name">UK &amp; Ireland</span>
+        </div>
+        <ul class="board-list">
+          <li><span class="board-name">Reed</span>&nbsp;<span class="board-desc">UK's largest job board</span></li>
+          <li><span class="board-name">Totaljobs</span>&nbsp;<span class="board-desc">Major UK generalist portal</span></li>
+          <li><span class="board-name">Indeed</span>&nbsp;<span class="board-desc">Global aggregator — UK data</span></li>
+          <li><span class="board-name">Glassdoor</span>&nbsp;<span class="board-desc">Jobs + company reviews</span></li>
+          <li><span class="board-name">Adzuna</span>&nbsp;<span class="board-desc">Aggregator, 16 countries</span></li>
+        </ul>
+      </div>
+
+      <div class="region-card">
+        <div class="region-header">
+          <span class="region-flag">🇫🇷</span>
+          <span class="region-name">France &amp; Benelux</span>
+        </div>
+        <ul class="board-list">
+          <li><span class="board-name">France Travail</span>&nbsp;<span class="board-desc">Official FR employment service</span></li>
+          <li><span class="board-name">Cadremploi</span>&nbsp;<span class="board-desc">Executive &amp; senior roles</span></li>
+          <li><span class="board-name">VDAB</span>&nbsp;<span class="board-desc">Official BE employment service</span></li>
+          <li><span class="board-name">Le Forem</span>&nbsp;<span class="board-desc">Wallonia's official portal</span></li>
+          <li><span class="board-name">Nat. Vacaturebank</span>&nbsp;<span class="board-desc">Netherlands</span></li>
+          <li><span class="board-name">Jobbird</span>&nbsp;<span class="board-desc">NL aggregator</span></li>
+        </ul>
+      </div>
+
+      <div class="region-card">
+        <div class="region-header">
+          <span class="region-flag">🇩🇰</span>
+          <span class="region-name">Nordics</span>
+        </div>
+        <ul class="board-list">
+          <li><span class="board-name">Jobindex</span>&nbsp;<span class="board-desc">Denmark's #1 job board</span></li>
+          <li><span class="board-name">StepStone DK</span>&nbsp;<span class="board-desc">Danish StepStone portal</span></li>
+          <li><span class="board-name">Jobnet</span>&nbsp;<span class="board-desc">DK official public portal</span></li>
+          <li><span class="board-name">FINN.no Jobs</span>&nbsp;<span class="board-desc">Norway's largest portal</span></li>
+          <li><span class="board-name">Duunitori</span>&nbsp;<span class="board-desc">Finland's top job board</span></li>
+        </ul>
+      </div>
+
+      <div class="region-card">
+        <div class="region-header">
+          <span class="region-flag">🌍</span>
+          <span class="region-name">Emerging Markets</span>
+        </div>
+        <ul class="board-list">
+          <li><span class="board-name">Naukri</span>&nbsp;<span class="board-desc">India, 70M+ listings</span></li>
+          <li><span class="board-name">Bayt.com</span>&nbsp;<span class="board-desc">Middle East &amp; North Africa</span></li>
+          <li><span class="board-name">Drushim</span>&nbsp;<span class="board-desc">Israel's largest job board</span></li>
+          <li><span class="board-name">Robota.ua</span>&nbsp;<span class="board-desc">Ukraine's leading portal</span></li>
+          <li><span class="board-name">Zhaopin</span>&nbsp;<span class="board-desc">China, 200M+ users</span></li>
+          <li><span class="board-name">Bumeran</span>&nbsp;<span class="board-desc">LATAM, 8 countries</span></li>
+        </ul>
+      </div>
+
+      <div class="region-card">
+        <div class="region-header">
+          <span class="region-flag">🌏</span>
+          <span class="region-name">APAC &amp; Global</span>
+        </div>
+        <ul class="board-list">
+          <li><span class="board-name">SEEK</span>&nbsp;<span class="board-desc">AU/NZ, 300K+ listings</span></li>
+          <li><span class="board-name">JobStreet</span>&nbsp;<span class="board-desc">SE Asia, 6 countries</span></li>
+          <li><span class="board-name">Monster</span>&nbsp;<span class="board-desc">US / UK / DE</span></li>
+          <li><span class="board-name">Dice.com</span>&nbsp;<span class="board-desc">US tech &amp; engineering</span></li>
+          <li><span class="board-name">Hiring.Cafe</span>&nbsp;<span class="board-desc">2.8M+ listings, 46 ATS sources</span></li>
+          <li><span class="board-name">RemoteOK</span>&nbsp;<span class="board-desc">Remote-first global</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── FEATURES ───────────────────────────────────────────────── -->
+<div class="section" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Why Black Falcon Data</div>
+      <h2 class="section-title">Built for<br>production</h2>
+      <p class="section-sub">Every actor ships with the same quality guarantees — no patchwork maintenance, no surprise schema changes.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-idx">FEAT_01</div>
+        <span class="feat-icon">🗺️</span>
+        <h3>Normalized output</h3>
+        <p>Consistent field names and types across all actors. ISO 8601 dates, absolute URLs, null for unavailable fields — never missing keys, never surprise schema diffs.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-idx">FEAT_02</div>
+        <span class="feat-icon">📡</span>
+        <h3>Daily canary monitoring</h3>
+        <p>Every actor has a dedicated health monitor running on a daily schedule. Site changes are caught before your pipeline fails — not after.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-idx">FEAT_03</div>
+        <span class="feat-icon">⚡</span>
+        <h3>Incremental mode</h3>
+        <p>Only fetch what's new or changed since the last run. State is scoped per query — no cross-contamination, no redundant network calls.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-idx">FEAT_04</div>
+        <span class="feat-icon">🤖</span>
+        <h3>MCP &amp; AI-agent ready</h3>
+        <p>Compact output mode strips to core fields for token-efficient LLM pipelines. Full MCP-compatible input/output schemas on every actor.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-idx">FEAT_05</div>
+        <span class="feat-icon">💳</span>
+        <h3>Pay per result</h3>
+        <p>PAY_PER_EVENT pricing — you pay for actor start and per delivered result. No idle compute, no monthly surprises.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-idx">FEAT_06</div>
+        <span class="feat-icon">🔍</span>
+        <h3>Smart input resolution</h3>
+        <p>Employer names, locations, and filters resolve intelligently. Actors never silently return 0 results when the data exists on the platform.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CTA ────────────────────────────────────────────────────── -->
+<div class="cta">
+  <div class="cta-inner">
+    <div class="kicker">Get started</div>
+    <h2>Integrate structured data</h2>
+    <p>Browse all 50+ actors on the Apify Store and start in minutes.</p>
+    <div class="cta-actions">
+      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-primary">
+        Open Apify Store &rarr;
+      </a>
+      <a href="mailto:hello@blackfalcondata.com" class="btn-ghost">Get in touch</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-left">
+      <img src="./logo.png" alt="Black Falcon Data" />
+      <span>blackfalcondata.com</span>
+    </div>
+    <div class="foot-right">&copy; 2025 Black Falcon Data</div>
+  </div>
+</footer>
+
+<script>
+  // Filament webbing
+  const wb = document.getElementById('webbing');
+  for (let i = 0; i < 35; i++) {
+    const f = document.createElement('div');
+    f.className = 'filament';
+    f.style.top = Math.random() * 100 + '%';
+    f.style.animationDelay = (Math.random() * 12) + 's';
+    f.style.animationDuration = (6 + Math.random() * 10) + 's';
+    wb.appendChild(f);
+  }
+
+  // UTC clock
+  function tick() {
+    const n = new Date();
+    document.getElementById('clock').textContent =
+      [n.getUTCHours(), n.getUTCMinutes(), n.getUTCSeconds()]
+        .map(v => String(v).padStart(2,'0')).join(':');
+  }
+  setInterval(tick, 1000); tick();
+
+  // Subtle bar jitter
+  setInterval(() => {
+    document.querySelectorAll('.node-bar-fill').forEach(b => {
+      const w = parseFloat(b.style.width);
+      b.style.width = Math.min(Math.max(w + (Math.random()-.5)*4, 8), 98) + '%';
+    });
+  }, 3000);
+</script>
+</body>
+</html>
