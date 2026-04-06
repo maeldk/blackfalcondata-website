@@ -779,9 +779,28 @@ setInterval(tick, 1000); tick();
       frac: Math.random(),
       size: 1 + Math.random() * 1.2,
       bright: 0.55 + Math.random() * 0.45,
+      color: 'blue',
       trail: [],
       stuckCount: 0,
     };
+  });
+
+  // 2 accent particles in amber/gold
+  const accentStep = Math.floor(edgeArr.length / 2);
+  [0, 1].forEach(i => {
+    const [x, y] = edgeArr[Math.floor(accentStep * (i + 0.5))];
+    const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
+    particles.push({
+      x, y, prevX: x, prevY: y,
+      dx: dir[0], dy: dir[1],
+      speed: 0.05 + Math.random() * 0.04,
+      frac: Math.random(),
+      size: 1.4 + Math.random() * 1,
+      bright: 0.7 + Math.random() * 0.3,
+      color: 'amber',
+      trail: [],
+      stuckCount: 0,
+    });
   });
 
   function advance(p) {
@@ -837,13 +856,18 @@ setInterval(tick, 1000); tick();
     for (const p of particles) {
       advance(p);
 
+      const isAmber = p.color === 'amber';
+      const trailRgb  = isAmber ? '255,180,60'  : '80,175,255';
+      const headRgb0  = isAmber ? '255,210,100' : '160,220,255';
+      const headRgb1  = isAmber ? '220,140,40'  : '80,160,240';
+
       // Glowing trail
       for (let i = 0; i < p.trail.length; i++) {
         const t = (i + 1) / p.trail.length;
         const [tx, ty] = toC(p.trail[i][0], p.trail[i][1]);
         ctx.beginPath();
         ctx.arc(tx, ty, p.size * 0.6 * t, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(80,175,255,${p.bright * t * 0.35})`;
+        ctx.fillStyle = `rgba(${trailRgb},${p.bright * t * 0.35})`;
         ctx.fill();
       }
 
@@ -853,8 +877,8 @@ setInterval(tick, 1000); tick();
       const [hx, hy] = toC(ix, iy);
       const r = p.size * 5;
       const g = ctx.createRadialGradient(hx, hy, 0, hx, hy, r);
-      g.addColorStop(0,   `rgba(160,220,255,${p.bright})`);
-      g.addColorStop(0.25,`rgba(80,160,240,${p.bright * 0.5})`);
+      g.addColorStop(0,   `rgba(${headRgb0},${p.bright})`);
+      g.addColorStop(0.25,`rgba(${headRgb1},${p.bright * 0.5})`);
       g.addColorStop(1,   'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
