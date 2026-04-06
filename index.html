@@ -115,10 +115,25 @@
 
     /* ── HERO ──────────────────────────────────────────────── */
     .hero {
-      min-height: 100vh;
+      min-height: 100vh; position: relative; overflow: hidden;
       display: flex; flex-direction: column; justify-content: center;
       padding-top: 72px;
     }
+    .hero-bg-logo {
+      position: absolute;
+      right: -6vw; top: 50%;
+      transform: translateY(-50%);
+      width: min(55vw, 700px);
+      pointer-events: none; z-index: 0;
+    }
+    .hero-bg-logo img {
+      width: 100%; height: auto;
+      filter: brightness(0) invert(1);
+      opacity: 0.03;
+      mask-image: radial-gradient(ellipse 80% 80% at 60% 50%, black 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 60% 50%, black 30%, transparent 80%);
+    }
+    .hero > *:not(.hero-bg-logo) { position: relative; z-index: 1; }
     .hero h1 {
       font-size: clamp(2.6rem, 6vw, 4.8rem);
       font-weight: 700; line-height: 1.08;
@@ -339,10 +354,12 @@
 
   <!-- ── HEADER ──────────────────────────────────────────────── -->
   <header>
+    <!-- logo removed from nav — revert by uncommenting:
     <a href="#" class="logo">
       <img src="./logo.png" alt="BlackFalconData" />
       <span class="logo-text">BlackFalconData</span>
     </a>
+    -->
     <nav>
       <ul>
         <li><a href="#capabilities">Capabilities</a></li>
@@ -358,6 +375,9 @@
 
   <!-- ── HERO ────────────────────────────────────────────────── -->
   <section class="hero">
+    <div class="hero-bg-logo" aria-hidden="true">
+      <img src="./logo.png" alt="" />
+    </div>
     <span class="mono-label">// PRECISE EXTRACTION ENGINE</span>
     <h1>Structured web data<br>for real business use.</h1>
     <p>Structured data feeds for job boards and marketplaces — normalized, MCP-native, and refreshed daily so your pipelines always have clean data to work with.</p>
