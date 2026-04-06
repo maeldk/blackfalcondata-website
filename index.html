@@ -126,10 +126,8 @@
       width: min(55vw, 700px);
       pointer-events: none; z-index: 0;
     }
-    .hero-bg-logo img {
-      width: 100%; height: auto;
-      filter: brightness(0) invert(1);
-      opacity: 0.03;
+    #logo-glow-canvas {
+      display: block; width: 100%; height: auto;
       mask-image: radial-gradient(ellipse 80% 80% at 60% 50%, black 30%, transparent 80%);
       -webkit-mask-image: radial-gradient(ellipse 80% 80% at 60% 50%, black 30%, transparent 80%);
     }
@@ -376,7 +374,7 @@
   <!-- ── HERO ────────────────────────────────────────────────── -->
   <section class="hero">
     <div class="hero-bg-logo" aria-hidden="true">
-      <img src="./logo.png" alt="" />
+      <canvas id="logo-glow-canvas"></canvas>
     </div>
     <span class="mono-label">// PRECISE EXTRACTION ENGINE</span>
     <h1>Structured web data<br>for real business use.</h1>
@@ -703,6 +701,169 @@ function tick() {
       .map(v => String(v).padStart(2,'0')).join(':');
 }
 setInterval(tick, 1000); tick();
+</script>
+
+<script>
+(async function () {
+  const canvas = document.getElementById('logo-glow-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  // Load logo
+  const img = new Image();
+  img.src = './logo.png';
+  await new Promise(r => { img.onload = r; img.onerror = r; });
+  if (!img.naturalWidth) return;
+
+  // Build edge map at reduced resolution
+  const S = 3;
+  const W = Math.round(img.naturalWidth / S);
+  const H = Math.round(img.naturalHeight / S);
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const oc = off.getContext('2d');
+  oc.drawImage(img, 0, 0, W, H);
+  const px = oc.getImageData(0, 0, W, H).data;
+
+  function a(x, y) {
+    if (x < 0 || y < 0 || x >= W || y >= H) return 0;
+    return px[(y * W + x) * 4 + 3];
+  }
+
+  // Collect edge pixels (opaque pixel adjacent to transparent)
+  const edgeArr = [];
+  const edgeSet = new Set();
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (a(x,y) > 25) {
+        if (a(x-1,y)<25 || a(x+1,y)<25 || a(x,y-1)<25 || a(x,y+1)<25 ||
+            a(x-1,y-1)<25 || a(x+1,y-1)<25 || a(x-1,y+1)<25 || a(x+1,y+1)<25) {
+          edgeSet.add(y * W + x);
+          edgeArr.push([x, y]);
+        }
+      }
+    }
+  }
+  if (!edgeArr.length) return;
+
+  // Size canvas to match its CSS display size
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    if (!r.width) return;
+    canvas.width  = Math.round(r.width  * dpr);
+    canvas.height = Math.round(r.width * dpr * (H / W)); // maintain aspect
+  }
+  resize();
+  window.addEventListener('resize', () => { resize(); });
+
+  // Map edge pixel coords → canvas display coords
+  function toC(x, y) {
+    const cw = canvas.width / dpr, ch = canvas.height / dpr;
+    return [x / W * cw, y / H * ch];
+  }
+
+  // 8-directional neighbor order
+  const DIRS = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+
+  // Spawn N particles spread evenly across the edge array
+  const N = 14;
+  const step2 = Math.floor(edgeArr.length / N);
+  const particles = Array.from({length: N}, (_, i) => {
+    const [x, y] = edgeArr[i * step2];
+    const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
+    return {
+      x, y,
+      dx: dir[0], dy: dir[1],
+      speed: 0.7 + Math.random() * 0.7,
+      frac: Math.random(),
+      size: 2.5 + Math.random() * 3,
+      bright: 0.55 + Math.random() * 0.45,
+      trail: [],
+      stuckCount: 0,
+    };
+  });
+
+  function advance(p) {
+    p.frac += p.speed;
+    while (p.frac >= 1) {
+      p.frac -= 1;
+      p.trail.push([p.x, p.y]);
+      if (p.trail.length > 16) p.trail.shift();
+
+      // Direction-biased neighbor search
+      let best = null, bestScore = -Infinity;
+      for (const [dx, dy] of DIRS) {
+        const nx = p.x + dx, ny = p.y + dy;
+        if (!edgeSet.has(ny * W + nx)) continue;
+        // Prefer continuing in same direction; avoid reversals
+        const dot = dx * p.dx + dy * p.dy;
+        const score = dot + Math.random() * 0.6;
+        if (score > bestScore) { bestScore = score; best = [nx, ny, dx, dy]; }
+      }
+
+      if (best) {
+        [p.x, p.y, p.dx, p.dy] = best;
+        p.stuckCount = 0;
+      } else {
+        p.stuckCount++;
+        if (p.stuckCount > 2) {
+          // Teleport to random edge pixel
+          const e = edgeArr[Math.floor(Math.random() * edgeArr.length)];
+          p.x = e[0]; p.y = e[1];
+          const d = DIRS[Math.floor(Math.random() * DIRS.length)];
+          p.dx = d[0]; p.dy = d[1];
+          p.trail = [];
+          p.stuckCount = 0;
+        }
+      }
+    }
+  }
+
+  function draw() {
+    const cw = canvas.width / dpr, ch = canvas.height / dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cw, ch);
+
+    // Dim logo base
+    ctx.save();
+    ctx.filter = 'brightness(0) invert(1)';
+    ctx.globalAlpha = 0.04;
+    ctx.drawImage(img, 0, 0, cw, ch);
+    ctx.restore();
+
+    // Particles
+    for (const p of particles) {
+      advance(p);
+
+      // Glowing trail
+      for (let i = 0; i < p.trail.length; i++) {
+        const t = (i + 1) / p.trail.length;
+        const [tx, ty] = toC(p.trail[i][0], p.trail[i][1]);
+        ctx.beginPath();
+        ctx.arc(tx, ty, p.size * 0.6 * t, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(80,175,255,${p.bright * t * 0.35})`;
+        ctx.fill();
+      }
+
+      // Head glow
+      const [hx, hy] = toC(p.x, p.y);
+      const r = p.size * 5;
+      const g = ctx.createRadialGradient(hx, hy, 0, hx, hy, r);
+      g.addColorStop(0,   `rgba(160,220,255,${p.bright})`);
+      g.addColorStop(0.25,`rgba(80,160,240,${p.bright * 0.5})`);
+      g.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(hx, hy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
 </script>
 
 </body>
