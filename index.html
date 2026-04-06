@@ -773,7 +773,7 @@ setInterval(tick, 1000); tick();
     const [x, y] = edgeArr[i * step2];
     const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
     return {
-      x, y,
+      x, y, prevX: x, prevY: y,
       dx: dir[0], dy: dir[1],
       speed: 0.063 + Math.random() * 0.063,
       frac: Math.random(),
@@ -788,6 +788,7 @@ setInterval(tick, 1000); tick();
     p.frac += p.speed;
     while (p.frac >= 1) {
       p.frac -= 1;
+      p.prevX = p.x; p.prevY = p.y;
       p.trail.push([p.x, p.y]);
       if (p.trail.length > 16) p.trail.shift();
 
@@ -846,8 +847,10 @@ setInterval(tick, 1000); tick();
         ctx.fill();
       }
 
-      // Head glow
-      const [hx, hy] = toC(p.x, p.y);
+      // Head glow — interpolate between prevX/Y and x/y for smooth sub-pixel motion
+      const ix = p.prevX + (p.x - p.prevX) * p.frac;
+      const iy = p.prevY + (p.y - p.prevY) * p.frac;
+      const [hx, hy] = toC(ix, iy);
       const r = p.size * 5;
       const g = ctx.createRadialGradient(hx, hy, 0, hx, hy, r);
       g.addColorStop(0,   `rgba(160,220,255,${p.bright})`);
