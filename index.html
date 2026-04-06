@@ -3,775 +3,687 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Black Falcon Data — Structured Data Feeds for Job Boards &amp; Marketplaces</title>
-  <meta name="description" content="Ready-to-use data scrapers for the world's leading job boards, automotive, and real estate platforms. Structured output, daily monitoring, MCP-compatible." />
+  <title>BlackFalconData | Structured Web Data</title>
+  <meta name="description" content="BlackFalconData builds reliable scrapers, APIs, monitoring workflows, and automation tools that turn public web data into usable business value." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
 
   <style>
-    /* ── Reset & Base ─────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
     :root {
-      --bg:          #060d18;
-      --bg-2:        #0b1828;
-      --surface:     #0e1f35;
-      --surface-2:   #122440;
-      --brand:       #2b3d55;
-      --accent:      #22d3c8;
-      --accent-dim:  rgba(34, 211, 200, 0.18);
-      --accent-border: rgba(34, 211, 200, 0.28);
-      --glow:        rgba(34, 211, 200, 0.07);
-      --text:        #dde8f2;
-      --text-2:      #8aa3bc;
-      --text-3:      #4d6880;
-      --border:      rgba(255, 255, 255, 0.06);
-      --border-2:    rgba(255, 255, 255, 0.10);
-      --r-sm:        6px;
-      --r:           12px;
-      --r-lg:        18px;
+      --bg:         #0a0c10;
+      --bg-2:       #0e1118;
+      --glass:      rgba(255,255,255,0.03);
+      --glass-2:    rgba(255,255,255,0.05);
+      --border:     rgba(255,255,255,0.08);
+      --border-h:   rgba(100,180,255,0.28);
+      --blue:       #64b4ff;
+      --blue-dim:   rgba(100,180,255,0.12);
+      --blue-glow:  rgba(100,180,255,0.06);
+      --text:       #e2e8f0;
+      --text-2:     #94a3b8;
+      --text-3:     #4b5563;
+      --mono:       'JetBrains Mono', monospace;
+      --sans:       'Inter', sans-serif;
     }
 
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
+      font-family: var(--sans);
       line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    /* ── Animations ───────────────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes scan {
-      0%   { transform: translateY(-100%); }
-      100% { transform: translateY(500%); }
-    }
-    @keyframes pulse-ring {
-      0%   { transform: scale(1); opacity: 0.4; }
-      100% { transform: scale(1.6); opacity: 0; }
+    /* ── Canvas background ─────────────────────────────────── */
+    #canvas {
+      position: fixed;
+      inset: 0; z-index: 0;
+      pointer-events: none;
     }
 
-    .anim-1 { animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) 0.1s both; }
-    .anim-2 { animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) 0.22s both; }
-    .anim-3 { animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) 0.36s both; }
-    .anim-4 { animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) 0.50s both; }
+    .wrap { position: relative; z-index: 1; }
 
-    /* ── NAV ──────────────────────────────────────────────── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(6, 13, 24, 0.88);
+    /* ── Header ────────────────────────────────────────────── */
+    header {
+      height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6%;
+      position: fixed; top: 0; width: 100%; z-index: 200;
+      background: rgba(10,12,16,0.75);
       backdrop-filter: blur(16px) saturate(1.4);
       -webkit-backdrop-filter: blur(16px) saturate(1.4);
       border-bottom: 1px solid var(--border);
     }
-    nav::before {
+    header::after {
       content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0.6;
+      position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--blue) 40%, transparent 100%);
+      opacity: 0.18;
     }
-    .nav-inner {
-      max-width: 1140px; margin: 0 auto;
-      padding: 0 28px;
-      display: flex; align-items: center; justify-content: space-between;
-      height: 64px;
+    .logo {
+      display: flex; align-items: center; gap: 11px;
+      text-decoration: none;
     }
-    .nav-logo img {
-      height: 38px; width: auto;
-      display: block;
+    .logo img {
+      height: 30px; width: auto;
       filter: brightness(0) invert(1);
     }
-    .nav-right { display: flex; align-items: center; gap: 36px; }
-    .nav-links { display: flex; gap: 28px; }
-    .nav-links a {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13.5px; font-weight: 500;
-      color: var(--text-2); text-decoration: none;
-      letter-spacing: 0.02em;
+    .logo-text {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: -0.03em; color: var(--text);
+    }
+    nav ul { list-style: none; display: flex; gap: 36px; }
+    nav a {
+      text-decoration: none; color: var(--text-2);
+      font-size: 0.875rem; font-weight: 500;
       transition: color .2s;
     }
-    .nav-links a:hover { color: var(--text); }
-    .btn-nav {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px; font-weight: 500;
-      color: var(--accent);
-      background: var(--accent-dim);
-      border: 1px solid var(--accent-border);
-      padding: 7px 18px; border-radius: var(--r-sm);
-      text-decoration: none;
-      letter-spacing: 0.02em;
-      transition: background .2s, color .2s, border-color .2s;
-      white-space: nowrap;
+    nav a:hover { color: var(--text); }
+    .btn-header {
+      background: var(--glass-2);
+      border: 1px solid var(--border);
+      color: var(--text); font-family: var(--sans);
+      font-size: 0.82rem; font-weight: 600;
+      padding: 9px 22px; cursor: pointer;
+      border-radius: 4px;
+      transition: background .2s, border-color .2s, color .2s;
+      text-decoration: none; display: inline-block;
     }
-    .btn-nav:hover {
-      background: rgba(34, 211, 200, 0.28);
-      color: #fff;
+    .btn-header:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #000;
     }
 
-    /* ── HERO ─────────────────────────────────────────────── */
+    /* ── Section base ──────────────────────────────────────── */
+    section { padding: 120px 10% 80px; }
+    .mono-label {
+      font-family: var(--mono);
+      font-size: 0.72rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--blue);
+      display: block; margin-bottom: 18px;
+    }
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700; letter-spacing: -0.03em;
+      margin-bottom: 56px; line-height: 1.12;
+    }
+
+    /* ── HERO ──────────────────────────────────────────────── */
     .hero {
-      position: relative;
-      min-height: 88vh;
-      display: flex; align-items: center;
-      overflow: hidden;
-      padding: 100px 28px 80px;
-    }
-    /* Dot grid */
-    .hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image: radial-gradient(circle, rgba(34,211,200,0.18) 1px, transparent 1px);
-      background-size: 32px 32px;
-      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
-      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
-    }
-    /* Glow orb */
-    .hero::after {
-      content: '';
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse 55% 55% at 15% 60%, rgba(34,211,200,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 60% at 75% 30%, rgba(43,61,85,0.35) 0%, transparent 60%);
-    }
-    /* Scan line */
-    .hero-scan {
-      position: absolute; left: 0; right: 0; top: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent 0%, rgba(34,211,200,0.4) 50%, transparent 100%);
-      animation: scan 5s linear infinite;
-      pointer-events: none;
-    }
-    /* Watermark logo */
-    .hero-watermark {
-      position: absolute; right: -2%; top: 50%;
-      transform: translateY(-50%);
-      width: 44%; max-width: 520px;
-      pointer-events: none; z-index: 0;
-    }
-    .hero-watermark img {
-      width: 100%; height: auto;
-      filter: brightness(0) invert(1);
-      opacity: 0.028;
-    }
-    .hero-inner {
-      position: relative; z-index: 1;
-      max-width: 1140px; margin: 0 auto; width: 100%;
-    }
-    .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--accent-dim);
-      border: 1px solid var(--accent-border);
-      border-radius: 100px;
-      padding: 5px 14px 5px 10px;
-      margin-bottom: 32px;
-    }
-    .hero-eyebrow-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent);
-      position: relative;
-    }
-    .hero-eyebrow-dot::after {
-      content: '';
-      position: absolute; inset: -3px;
-      border-radius: 50%;
-      background: var(--accent);
-      opacity: 0.4;
-      animation: pulse-ring 1.8s ease-out infinite;
-    }
-    .hero-eyebrow span {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; font-weight: 500;
-      color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding-top: 72px;
     }
     .hero h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(2.4rem, 5.5vw, 4rem);
-      font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.03em;
-      color: #ffffff;
-      max-width: 720px;
-      margin-bottom: 24px;
-    }
-    .hero h1 em {
-      font-style: normal;
-      background: linear-gradient(135deg, var(--accent) 0%, #6ee7df 100%);
+      font-size: clamp(2.6rem, 6vw, 4.8rem);
+      font-weight: 700; line-height: 1.08;
+      letter-spacing: -0.04em;
+      max-width: 880px; margin-bottom: 28px;
+      background: linear-gradient(160deg, #ffffff 30%, rgba(255,255,255,0.55));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .hero-sub {
-      font-size: 1.05rem; color: var(--text-2);
-      max-width: 520px; line-height: 1.75;
-      margin-bottom: 44px;
+    .hero p {
+      font-size: 1.15rem; color: var(--text-2); font-weight: 300;
+      max-width: 580px; margin-bottom: 44px; line-height: 1.8;
     }
-    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14.5px; font-weight: 500;
-      color: var(--bg);
-      background: var(--accent);
-      padding: 13px 26px; border-radius: var(--r-sm);
-      text-decoration: none;
-      transition: background .2s, transform .15s, box-shadow .2s;
+    .hero-btns { display: flex; align-items: center; gap: 0; }
+    .btn-solid {
+      background: #fff; color: #000;
+      font-family: var(--sans); font-size: 0.9rem; font-weight: 600;
+      padding: 14px 32px; border: none; cursor: pointer;
+      border-radius: 4px;
+      transition: background .2s, transform .15s;
+      text-decoration: none; display: inline-block;
     }
-    .btn-primary:hover {
-      background: #38e8de;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(34,211,200,0.35);
-    }
+    .btn-solid:hover { background: var(--blue); transform: translateY(-1px); }
     .btn-ghost {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14.5px; font-weight: 500;
-      color: var(--text-2);
-      background: transparent;
-      border: 1px solid var(--border-2);
-      padding: 13px 26px; border-radius: var(--r-sm);
-      text-decoration: none;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-2); font-family: var(--sans);
+      font-size: 0.9rem; font-weight: 500;
+      padding: 14px 32px; cursor: pointer; margin-left: 16px;
+      border-radius: 4px;
       transition: border-color .2s, color .2s;
+      text-decoration: none; display: inline-block;
     }
-    .btn-ghost:hover { border-color: var(--accent-border); color: var(--text); }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--text); }
 
-    /* ── STATS ────────────────────────────────────────────── */
-    .stats {
-      background: var(--bg-2);
+    /* Hero stats strip */
+    .hero-stats {
+      display: flex; gap: 0; margin-top: 72px;
       border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 0 28px;
+      padding-top: 0;
     }
-    .stats-inner {
-      max-width: 1140px; margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    .hstat {
+      padding: 32px 48px 0 0;
+      border-right: 1px solid var(--border);
+      margin-right: 48px;
     }
-    .stat-item {
-      padding: 40px 0;
-      text-align: center;
-      position: relative;
+    .hstat:last-child { border-right: none; margin-right: 0; }
+    .hstat-val {
+      display: block; font-family: var(--mono);
+      font-size: 2rem; font-weight: 400;
+      color: #fff; letter-spacing: -0.04em; line-height: 1;
     }
-    .stat-item + .stat-item::before {
-      content: '';
-      position: absolute; left: 0; top: 20%; bottom: 20%;
-      width: 1px; background: var(--border-2);
-    }
-    .stat-num {
-      display: block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 2.4rem; font-weight: 500;
-      color: #fff; letter-spacing: -0.03em;
-      line-height: 1;
-    }
-    .stat-num span { color: var(--accent); }
-    .stat-label {
-      display: block;
-      font-size: 11px; font-weight: 500;
-      color: var(--text-3); letter-spacing: 0.1em;
-      text-transform: uppercase; margin-top: 8px;
+    .hstat-label {
+      display: block; font-size: 0.72rem; font-weight: 500;
+      color: var(--text-3); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-top: 8px;
     }
 
-    /* ── SHARED SECTION ───────────────────────────────────── */
-    .section { padding: 96px 28px; }
-    .section-alt { background: var(--bg-2); }
-    .wrap { max-width: 1140px; margin: 0 auto; }
-    .section-kicker {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; font-weight: 500;
-      color: var(--accent); letter-spacing: 0.12em;
-      text-transform: uppercase; margin-bottom: 14px;
-    }
-    .section-kicker::before { content: '// '; opacity: 0.5; }
-    .section-title {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.8rem, 3.2vw, 2.6rem);
-      font-weight: 800; letter-spacing: -0.025em;
-      color: #fff; line-height: 1.1;
-      margin-bottom: 16px;
-    }
-    .section-sub {
-      font-size: 1rem; color: var(--text-2);
-      max-width: 500px; line-height: 1.75;
-    }
-    .section-head { margin-bottom: 56px; }
-
-    /* ── CATEGORIES ───────────────────────────────────────── */
-    .cat-grid {
+    /* ── CAPABILITIES ──────────────────────────────────────── */
+    #capabilities { background: var(--bg-2); border-top: 1px solid var(--border); }
+    .cap-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px; background: var(--border);
     }
-    .cat-card {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 32px 28px 28px;
-      overflow: hidden;
-      transition: border-color .25s, transform .2s, box-shadow .25s;
-      cursor: default;
+    .cap-card {
+      background: var(--bg-2);
+      padding: 40px;
+      position: relative; overflow: hidden;
+      transition: background .25s;
     }
-    .cat-card::before {
+    .cap-card:hover { background: rgba(100,180,255,0.03); }
+    .cap-card::before {
       content: '';
-      position: absolute; top: 0; left: 0; bottom: 0;
-      width: 3px;
-      background: linear-gradient(180deg, var(--accent) 0%, transparent 100%);
-      opacity: 0;
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: var(--blue); opacity: 0;
       transition: opacity .25s;
     }
-    .cat-card:hover {
-      border-color: var(--accent-border);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    .cap-card:hover::before { opacity: 0.5; }
+    .cap-num {
+      font-family: var(--mono);
+      font-size: 0.68rem; color: var(--text-3);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      display: block; margin-bottom: 20px;
     }
-    .cat-card:hover::before { opacity: 1; }
-    .cat-emoji { font-size: 1.8rem; display: block; margin-bottom: 18px; }
-    .cat-card h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.1rem; font-weight: 700;
-      color: #fff; margin-bottom: 10px;
+    .cap-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; }
+    .cap-card p { color: var(--text-2); font-size: 0.9rem; line-height: 1.7; }
+
+    /* ── SOLUTIONS ─────────────────────────────────────────── */
+    #solutions { border-top: 1px solid var(--border); }
+    .sol-row {
+      display: flex; align-items: stretch; gap: 80px;
+      margin-bottom: 80px;
     }
-    .cat-card p { font-size: 13.5px; color: var(--text-2); line-height: 1.65; }
-    .cat-badge {
-      display: inline-flex; align-items: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; font-weight: 500;
-      color: var(--accent);
-      background: var(--accent-dim);
-      border: 1px solid var(--accent-border);
-      padding: 3px 10px; border-radius: 100px;
-      margin-top: 20px;
-      letter-spacing: 0.04em;
+    .sol-row:last-child { margin-bottom: 0; }
+    .sol-row:nth-child(even) { flex-direction: row-reverse; }
+    .sol-text { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .sol-text h3 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .sol-text p { color: var(--text-2); font-size: 0.95rem; line-height: 1.75; margin-bottom: 24px; }
+    .sol-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sol-tag {
+      font-family: var(--mono); font-size: 0.68rem; font-weight: 400;
+      color: var(--blue);
+      background: var(--blue-dim);
+      border: 1px solid rgba(100,180,255,0.2);
+      padding: 3px 10px; border-radius: 2px;
+      letter-spacing: 0.06em;
     }
 
-    /* ── REGION BOARDS ────────────────────────────────────── */
-    .region-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 18px;
-    }
-    .region-card {
-      background: var(--surface);
+    .sol-visual {
+      flex: 1.2; height: 340px;
+      background: linear-gradient(135deg, var(--glass), var(--blue-glow));
       border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 28px;
-      transition: border-color .2s;
-    }
-    .region-card:hover { border-color: var(--border-2); }
-    .region-header {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .region-flag { font-size: 1.3rem; line-height: 1; }
-    .region-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; font-weight: 500;
-      color: var(--accent); letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .board-list { list-style: none; display: flex; flex-direction: column; gap: 11px; }
-    .board-list li {
-      display: flex; align-items: baseline; gap: 10px;
-    }
-    .board-list li::before {
-      content: '›';
-      color: var(--text-3);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px; flex-shrink: 0;
-    }
-    .board-name { font-size: 13.5px; font-weight: 500; color: var(--text); }
-    .board-desc { font-size: 12px; color: var(--text-3); }
-
-    /* ── FEATURES ─────────────────────────────────────────── */
-    .feat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 18px;
-    }
-    .feat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 32px 28px;
-      transition: border-color .25s, transform .2s;
-    }
-    .feat-card:hover {
-      border-color: var(--accent-border);
-      transform: translateY(-3px);
-    }
-    .feat-icon-wrap {
-      width: 46px; height: 46px;
-      background: var(--surface-2);
-      border: 1px solid var(--border-2);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.25rem;
-      margin-bottom: 20px;
-    }
-    .feat-card h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px; font-weight: 700;
-      color: #fff; margin-bottom: 10px;
-    }
-    .feat-card p { font-size: 13.5px; color: var(--text-2); line-height: 1.7; }
-
-    /* ── CTA STRIP ────────────────────────────────────────── */
-    .cta-strip {
-      background: var(--bg-2);
-      border-top: 1px solid var(--border);
       position: relative; overflow: hidden;
     }
-    .cta-strip::before {
-      content: '';
+    .sol-visual::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, var(--bg) 100%);
+      z-index: 1; pointer-events: none;
+    }
+    .stream {
       position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse 60% 100% at 50% 100%, rgba(34,211,200,0.06) 0%, transparent 60%);
-      pointer-events: none;
+      padding: 20px 24px; overflow: hidden;
+      font-family: var(--mono); font-size: 10px;
+      display: flex; flex-direction: column; gap: 8px;
+      color: var(--text-3);
     }
-    .cta-inner {
-      position: relative; z-index: 1;
-      max-width: 700px; margin: 0 auto;
-      padding: 96px 28px;
-      text-align: center;
-    }
-    .cta-inner h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-      font-weight: 800; letter-spacing: -0.025em;
-      color: #fff; margin-bottom: 14px;
-    }
-    .cta-inner p { font-size: 1rem; color: var(--text-2); margin-bottom: 40px; }
-    .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-    /* ── FOOTER ───────────────────────────────────────────── */
+    /* ── WHY ───────────────────────────────────────────────── */
+    #why { background: var(--bg-2); border-top: 1px solid var(--border); }
+    .why-wrap {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 100px; align-items: start;
+    }
+    .why-text h2 { margin-bottom: 20px; }
+    .why-text p { color: var(--text-2); font-size: 0.95rem; line-height: 1.8; margin-bottom: 32px; }
+    .why-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border);
+    }
+    .wstat {
+      background: var(--bg-2);
+      padding: 36px 32px;
+      transition: background .2s;
+    }
+    .wstat:hover { background: rgba(100,180,255,0.03); }
+    .wstat-val {
+      display: block; font-family: var(--mono);
+      font-size: 2.4rem; font-weight: 400;
+      color: #fff; letter-spacing: -0.04em; line-height: 1;
+    }
+    .wstat-label {
+      display: block; font-size: 0.72rem; font-weight: 500;
+      color: var(--text-3); text-transform: uppercase;
+      letter-spacing: 0.1em; margin-top: 10px;
+    }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
     footer {
-      background: var(--bg);
+      padding: 80px 10% 40px;
       border-top: 1px solid var(--border);
-      padding: 36px 28px;
+      background: rgba(0,0,0,0.3);
     }
-    .foot-inner {
-      max-width: 1140px; margin: 0 auto;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 16px;
+    .foot-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px; margin-bottom: 60px;
     }
-    .foot-left { display: flex; align-items: center; gap: 14px; }
-    .foot-left img {
-      height: 28px; width: auto;
-      filter: brightness(0) invert(1);
-      opacity: 0.7;
+    .foot-brand img {
+      height: 28px; filter: brightness(0) invert(1); opacity: 0.7;
+      margin-bottom: 14px; display: block;
     }
-    .foot-left span {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px; color: var(--text-3); letter-spacing: 0.04em;
+    .foot-brand p {
+      color: var(--text-3); font-size: 0.875rem; line-height: 1.7;
+      max-width: 260px;
     }
-    .foot-right { font-size: 12.5px; color: var(--text-3); }
+    .foot-col h4 {
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-3); margin-bottom: 20px;
+    }
+    .foot-col ul { list-style: none; }
+    .foot-col li { margin-bottom: 12px; }
+    .foot-col a {
+      text-decoration: none; color: var(--text-2);
+      font-size: 0.875rem; transition: color .2s;
+    }
+    .foot-col a:hover { color: var(--text); }
+    .foot-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      border-top: 1px solid var(--border); padding-top: 28px;
+    }
+    .foot-copy { font-family: var(--mono); font-size: 0.7rem; color: var(--text-3); }
+    .foot-status {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--text-3);
+    }
+    .status-ok { color: #34d399; }
 
-    /* ── RESPONSIVE ───────────────────────────────────────── */
-    @media (max-width: 768px) {
-      .stats-inner { grid-template-columns: repeat(2, 1fr); }
-      .stat-item:nth-child(3)::before,
-      .stat-item:nth-child(1)::before { display: none; }
-      .stat-item:nth-child(3), .stat-item:nth-child(4) {
-        border-top: 1px solid var(--border-2);
-      }
-      .nav-links { display: none; }
-      .hero-watermark { display: none; }
-      .hero h1 { font-size: 2.2rem; }
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .sol-row, .sol-row:nth-child(even) { flex-direction: column; gap: 32px; }
+      .sol-visual { flex: none; height: 260px; }
+      .why-wrap { grid-template-columns: 1fr; gap: 48px; }
+      .foot-grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 480px) {
-      .stats-inner { grid-template-columns: 1fr 1fr; }
-      .section { padding: 72px 20px; }
+    @media (max-width: 720px) {
+      nav ul { display: none; }
+      section { padding: 80px 6% 56px; }
+      .hero-stats { flex-wrap: wrap; }
+      .foot-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── NAV ────────────────────────────────────────────────── -->
-<nav>
-  <div class="nav-inner">
-    <a href="#" aria-label="Black Falcon Data">
-      <img src="./logo.png" alt="Black Falcon Data" style="height:38px;" />
+<canvas id="canvas"></canvas>
+
+<div class="wrap">
+
+  <!-- ── HEADER ──────────────────────────────────────────────── -->
+  <header>
+    <a href="#" class="logo">
+      <img src="./logo.png" alt="BlackFalconData" />
+      <span class="logo-text">BlackFalconData</span>
     </a>
-    <div class="nav-right">
-      <nav class="nav-links">
-        <a href="#products">Products</a>
-        <a href="#features">Features</a>
-      </nav>
-      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-nav">
-        Browse Actors &rarr;
-      </a>
-    </div>
-  </div>
-</nav>
+    <nav>
+      <ul>
+        <li><a href="#capabilities">Capabilities</a></li>
+        <li><a href="#solutions">Solutions</a></li>
+        <li><a href="#why">Infrastructure</a></li>
+        <li><a href="mailto:hello@blackfalcondata.com">Contact</a></li>
+      </ul>
+    </nav>
+    <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-header">
+      Browse actors &rarr;
+    </a>
+  </header>
 
-<!-- ── HERO ───────────────────────────────────────────────── -->
-<div class="hero">
-  <div class="hero-scan"></div>
-  <div class="hero-watermark" aria-hidden="true">
-    <img src="./logo.png" alt="" />
-  </div>
-  <div class="hero-inner">
-    <div class="hero-eyebrow anim-1">
-      <span class="hero-eyebrow-dot"></span>
-      <span>50+ scrapers &nbsp;·&nbsp; 40+ countries &nbsp;·&nbsp; daily health monitoring</span>
-    </div>
-    <h1 class="anim-2">
-      Structured data feeds for the world's leading
-      <em>job boards &amp; marketplaces</em>
-    </h1>
-    <p class="hero-sub anim-3">
-      Ready-to-use Apify actors delivering clean, normalized data — from global
-      job portals to automotive and real estate platforms. One integration,
-      consistent output.
-    </p>
-    <div class="hero-ctas anim-4">
-      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-primary">
-        Browse all actors &nbsp;&rarr;
-      </a>
-      <a href="#products" class="btn-ghost">See what we cover</a>
-    </div>
-  </div>
-</div>
-
-<!-- ── STATS ──────────────────────────────────────────────── -->
-<div class="stats">
-  <div class="stats-inner">
-    <div class="stat-item">
-      <span class="stat-num">50<span>+</span></span>
-      <span class="stat-label">Active scrapers</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">40<span>+</span></span>
-      <span class="stat-label">Countries covered</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">24<span>/7</span></span>
-      <span class="stat-label">Canary monitoring</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">PPE</span>
-      <span class="stat-label">Pay per result</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── CATEGORIES ─────────────────────────────────────────── -->
-<div class="section section-alt" id="products">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="section-kicker">What we cover</div>
-      <h2 class="section-title">Data feeds across four verticals</h2>
-      <p class="section-sub">Every actor delivers normalized, structured output with consistent field names — built for pipelines, AI agents, and MCP workflows.</p>
-    </div>
-    <div class="cat-grid">
-      <div class="cat-card">
-        <span class="cat-emoji">💼</span>
-        <h3>Job Intelligence</h3>
-        <p>Global and regional job boards from Europe, North America, APAC, LATAM, and the Middle East. Full descriptions, salary, contact data, and incremental change tracking.</p>
-        <span class="cat-badge">40+ job boards</span>
-      </div>
-      <div class="cat-card">
-        <span class="cat-emoji">🚗</span>
-        <h3>Automotive</h3>
-        <p>Used car listings from Europe's largest automotive marketplaces — price history, specs, dealer data, and cross-portal deduplication.</p>
-        <span class="cat-badge">4 portals</span>
-      </div>
-      <div class="cat-card">
-        <span class="cat-emoji">🏠</span>
-        <h3>Real Estate</h3>
-        <p>Property listings with geo-precision, price trends, and contact enrichment from leading European real estate platforms.</p>
-        <span class="cat-badge">2 portals</span>
-      </div>
-      <div class="cat-card">
-        <span class="cat-emoji">🛒</span>
-        <h3>Classifieds &amp; Freelance</h3>
-        <p>General classifieds, second-hand marketplaces, and freelance platforms — structured product and gig data at scale.</p>
-        <span class="cat-badge">4 portals</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── JOB BOARDS ──────────────────────────────────────────── -->
-<div class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="section-kicker">Job board coverage</div>
-      <h2 class="section-title">40+ job portals, every major market</h2>
-      <p class="section-sub">From official government employment services to the world's largest private job boards — with normalized output across all of them.</p>
-    </div>
-    <div class="region-grid">
-
-      <div class="region-card">
-        <div class="region-header">
-          <span class="region-flag">🇩🇪</span>
-          <span class="region-name">DACH</span>
-        </div>
-        <ul class="board-list">
-          <li><span class="board-name">StepStone</span>&nbsp;<span class="board-desc">— Germany's #1 job board</span></li>
-          <li><span class="board-name">Xing</span>&nbsp;<span class="board-desc">— Professional network &amp; jobs</span></li>
-          <li><span class="board-name">Arbeitsagentur</span>&nbsp;<span class="board-desc">— Official DE employment portal</span></li>
-          <li><span class="board-name">Jobs.ch &amp; Jobup.ch</span>&nbsp;<span class="board-desc">— Switzerland's top portals</span></li>
-          <li><span class="board-name">Karriere.at</span>&nbsp;<span class="board-desc">— Austria's leading job board</span></li>
-        </ul>
-      </div>
-
-      <div class="region-card">
-        <div class="region-header">
-          <span class="region-flag">🇬🇧</span>
-          <span class="region-name">UK &amp; Ireland</span>
-        </div>
-        <ul class="board-list">
-          <li><span class="board-name">Reed</span>&nbsp;<span class="board-desc">— UK's largest job board</span></li>
-          <li><span class="board-name">Totaljobs</span>&nbsp;<span class="board-desc">— Major UK generalist portal</span></li>
-          <li><span class="board-name">Indeed</span>&nbsp;<span class="board-desc">— Global aggregator — UK data</span></li>
-          <li><span class="board-name">Glassdoor</span>&nbsp;<span class="board-desc">— Jobs + company reviews</span></li>
-          <li><span class="board-name">Adzuna</span>&nbsp;<span class="board-desc">— Aggregator, 16 countries</span></li>
-        </ul>
-      </div>
-
-      <div class="region-card">
-        <div class="region-header">
-          <span class="region-flag">🇫🇷</span>
-          <span class="region-name">France &amp; Benelux</span>
-        </div>
-        <ul class="board-list">
-          <li><span class="board-name">France Travail</span>&nbsp;<span class="board-desc">— Official FR employment service</span></li>
-          <li><span class="board-name">Cadremploi</span>&nbsp;<span class="board-desc">— Executive &amp; senior roles</span></li>
-          <li><span class="board-name">VDAB</span>&nbsp;<span class="board-desc">— Official BE employment service</span></li>
-          <li><span class="board-name">Le Forem</span>&nbsp;<span class="board-desc">— Wallonia's official portal</span></li>
-          <li><span class="board-name">Nationale Vacaturebank</span>&nbsp;<span class="board-desc">— Netherlands</span></li>
-          <li><span class="board-name">Jobbird</span>&nbsp;<span class="board-desc">— NL aggregator</span></li>
-        </ul>
-      </div>
-
-      <div class="region-card">
-        <div class="region-header">
-          <span class="region-flag">🇩🇰</span>
-          <span class="region-name">Nordics</span>
-        </div>
-        <ul class="board-list">
-          <li><span class="board-name">Jobindex</span>&nbsp;<span class="board-desc">— Denmark's #1 job board</span></li>
-          <li><span class="board-name">StepStone DK</span>&nbsp;<span class="board-desc">— Danish StepStone portal</span></li>
-          <li><span class="board-name">Jobdanmark</span>&nbsp;<span class="board-desc">— DK employer-driven listings</span></li>
-          <li><span class="board-name">Jobnet</span>&nbsp;<span class="board-desc">— DK official public portal</span></li>
-          <li><span class="board-name">FINN.no Jobs</span>&nbsp;<span class="board-desc">— Norway's largest portal</span></li>
-          <li><span class="board-name">Duunitori</span>&nbsp;<span class="board-desc">— Finland's top job board</span></li>
-        </ul>
-      </div>
-
-      <div class="region-card">
-        <div class="region-header">
-          <span class="region-flag">🌍</span>
-          <span class="region-name">Emerging Markets</span>
-        </div>
-        <ul class="board-list">
-          <li><span class="board-name">Naukri</span>&nbsp;<span class="board-desc">— India, 70M+ listings</span></li>
-          <li><span class="board-name">Bayt.com</span>&nbsp;<span class="board-desc">— Middle East &amp; North Africa</span></li>
-          <li><span class="board-name">Drushim</span>&nbsp;<span class="board-desc">— Israel's largest job board</span></li>
-          <li><span class="board-name">Robota.ua</span>&nbsp;<span class="board-desc">— Ukraine's leading portal</span></li>
-          <li><span class="board-name">Zhaopin</span>&nbsp;<span class="board-desc">— China, 200M+ users</span></li>
-          <li><span class="board-name">Bumeran</span>&nbsp;<span class="board-desc">— LATAM, 8 countries</span></li>
-        </ul>
-      </div>
-
-      <div class="region-card">
-        <div class="region-header">
-          <span class="region-flag">🌏</span>
-          <span class="region-name">APAC &amp; Global</span>
-        </div>
-        <ul class="board-list">
-          <li><span class="board-name">SEEK</span>&nbsp;<span class="board-desc">— AU/NZ, 300K+ listings</span></li>
-          <li><span class="board-name">JobStreet</span>&nbsp;<span class="board-desc">— SE Asia, 6 countries</span></li>
-          <li><span class="board-name">Monster</span>&nbsp;<span class="board-desc">— US / UK / DE</span></li>
-          <li><span class="board-name">Dice.com</span>&nbsp;<span class="board-desc">— US tech &amp; engineering</span></li>
-          <li><span class="board-name">Hiring.Cafe</span>&nbsp;<span class="board-desc">— 2.8M+ listings, 46 ATS sources</span></li>
-          <li><span class="board-name">RemoteOK</span>&nbsp;<span class="board-desc">— Remote-first global</span></li>
-        </ul>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ── FEATURES ────────────────────────────────────────────── -->
-<div class="section section-alt" id="features">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="section-kicker">Why Black Falcon Data</div>
-      <h2 class="section-title">Built for production pipelines</h2>
-      <p class="section-sub">Every actor ships with the same quality guarantees — no patchwork maintenance, no surprise schema changes.</p>
-    </div>
-    <div class="feat-grid">
-      <div class="feat-card">
-        <div class="feat-icon-wrap">🗺️</div>
-        <h3>Normalized output</h3>
-        <p>Consistent field names and types across all actors. ISO 8601 dates, absolute URLs, null for unavailable fields — never missing keys, never surprise schema diffs.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap">📡</div>
-        <h3>Daily canary monitoring</h3>
-        <p>Every actor has a dedicated health monitor running on a daily schedule. Site changes are caught before your pipeline fails — not after.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap">⚡</div>
-        <h3>Incremental mode</h3>
-        <p>Only fetch what's new or changed since the last run. State is scoped per query — no cross-contamination, no redundant network calls.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap">🤖</div>
-        <h3>MCP &amp; AI-agent ready</h3>
-        <p>Compact output mode strips to core fields for token-efficient LLM pipelines. Full MCP-compatible input/output schemas on every actor.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap">💳</div>
-        <h3>Pay per result</h3>
-        <p>PAY_PER_EVENT pricing — you pay for actor start and per delivered result. No idle compute costs, no surprises at the end of the month.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap">🔍</div>
-        <h3>Smart input resolution</h3>
-        <p>Employer names, locations, and filters resolve intelligently. Actors never silently return 0 results when the data exists on the platform.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── CTA ─────────────────────────────────────────────────── -->
-<div class="cta-strip">
-  <div class="cta-inner">
-    <h2>Ready to integrate structured data?</h2>
-    <p>Browse all 50+ actors on the Apify Store and start in minutes.</p>
-    <div class="cta-actions">
-      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-primary">
-        Open Apify Store &nbsp;&rarr;
+  <!-- ── HERO ────────────────────────────────────────────────── -->
+  <section class="hero">
+    <span class="mono-label">// PRECISE EXTRACTION ENGINE</span>
+    <h1>Structured web data<br>for real business use.</h1>
+    <p>BlackFalconData builds reliable scrapers, APIs, monitoring workflows, and automation tools that turn public web data into usable business value.</p>
+    <div class="hero-btns">
+      <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-solid">
+        Explore products
       </a>
       <a href="mailto:hello@blackfalcondata.com" class="btn-ghost">Get in touch</a>
     </div>
-  </div>
-</div>
-
-<!-- ── FOOTER ─────────────────────────────────────────────── -->
-<footer>
-  <div class="foot-inner">
-    <div class="foot-left">
-      <img src="./logo.png" alt="Black Falcon Data" />
-      <span>blackfalcondata.com</span>
+    <div class="hero-stats">
+      <div class="hstat">
+        <span class="hstat-val">50+</span>
+        <span class="hstat-label">Data feeds</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-val">40+</span>
+        <span class="hstat-label">Countries covered</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-val">Daily</span>
+        <span class="hstat-label">Data refresh</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-val">MCP</span>
+        <span class="hstat-label">AI-native protocol</span>
+      </div>
     </div>
-    <div class="foot-right">&copy; 2025 Black Falcon Data. All rights reserved.</div>
-  </div>
-</footer>
+  </section>
+
+  <!-- ── CAPABILITIES ────────────────────────────────────────── -->
+  <section id="capabilities">
+    <span class="mono-label">01 // WHAT WE PROVIDE</span>
+    <h2>Structured data. Ready to use.</h2>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <span class="cap-num">01. Job Market</span>
+        <h3>Job Market Data</h3>
+        <p>Structured listings from the world's leading job boards — salary ranges, contact data, full descriptions, and location. Normalized across 40+ countries, refreshed daily.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-num">02. Marketplaces</span>
+        <h3>Marketplace Intelligence</h3>
+        <p>Pricing, inventory, and listing data from automotive, real estate, and classified platforms across Europe. Consistent field names across every source.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-num">03. Access</span>
+        <h3>REST APIs</h3>
+        <p>Clean, versioned endpoints over every data set. Consistent schemas, ISO 8601 dates, and usage-based pricing — so your integration stays predictable at any scale.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-num">04. AI Integration</span>
+        <h3>MCP-Native</h3>
+        <p>Every data feed is available via the Model Context Protocol. Connect any source directly to your AI agent or LLM workflow — no custom glue code, no schema translation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SOLUTIONS ────────────────────────────────────────────── -->
+  <section id="solutions">
+    <span class="mono-label">02 // FEATURED SOLUTIONS</span>
+
+    <div class="sol-row">
+      <div class="sol-text">
+        <span class="mono-label">CASE_01</span>
+        <h3>Global Job Board Extraction</h3>
+        <p>Structured job listings from 40+ boards across 40+ countries — salary, contact data, full descriptions, and incremental change tracking. Normalized output across every source, zero schema drift.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">StepStone</span>
+          <span class="sol-tag">Indeed</span>
+          <span class="sol-tag">Reed</span>
+          <span class="sol-tag">Naukri</span>
+          <span class="sol-tag">SEEK</span>
+          <span class="sol-tag">Monster</span>
+          <span class="sol-tag">+34 more</span>
+        </div>
+      </div>
+      <div class="sol-visual">
+        <div class="stream" id="stream-1"></div>
+      </div>
+    </div>
+
+    <div class="sol-row">
+      <div class="sol-text">
+        <span class="mono-label">CASE_02</span>
+        <h3>Marketplace &amp; Listing Intelligence</h3>
+        <p>Used car listings, property data, and classified ads — extracted and normalized from Europe's leading platforms. Price history, spec data, dealer profiles, and cross-portal deduplication built in.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">AutoScout24</span>
+          <span class="sol-tag">Bilbasen</span>
+          <span class="sol-tag">Immowelt</span>
+          <span class="sol-tag">Idealista</span>
+          <span class="sol-tag">DBA</span>
+          <span class="sol-tag">Willhaben</span>
+        </div>
+      </div>
+      <div class="sol-visual">
+        <div class="stream" id="stream-2"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── WHY ──────────────────────────────────────────────────── -->
+  <section id="why">
+    <span class="mono-label">03 // WHY BLACKFALCONDATA</span>
+    <div class="why-wrap">
+      <div class="why-text">
+        <h2>Data your pipelines<br>can depend on.</h2>
+        <p>Most data projects stall on maintenance. Sources change, schemas drift, and what worked last month silently breaks. BlackFalconData manages the full data lifecycle — so your team receives clean, current, structured data every day without operational overhead.</p>
+        <a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener" class="btn-header" style="display:inline-block;">
+          Explore our data feeds &rarr;
+        </a>
+      </div>
+      <div class="why-stats">
+        <div class="wstat">
+          <span class="wstat-val">50+</span>
+          <span class="wstat-label">Data feeds globally</span>
+        </div>
+        <div class="wstat">
+          <span class="wstat-val">40+</span>
+          <span class="wstat-label">Countries covered</span>
+        </div>
+        <div class="wstat">
+          <span class="wstat-val">Daily</span>
+          <span class="wstat-label">Refresh cycle</span>
+        </div>
+        <div class="wstat">
+          <span class="wstat-val">MCP</span>
+          <span class="wstat-label">AI-native protocol</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────── -->
+  <footer>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <img src="./logo.png" alt="BlackFalconData" />
+        <p>Building the bridge between the raw web and usable business intelligence — one structured feed at a time.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Products</h4>
+        <ul>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Job board scrapers</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Automotive data</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Real estate</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Marketplace feeds</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Access</h4>
+        <ul>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">REST API</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">MCP integration</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Pricing</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Documentation</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="mailto:hello@blackfalcondata.com">Contact</a></li>
+          <li><a href="https://apify.com/blackfalcondata" target="_blank" rel="noopener">Apify profile</a></li>
+          <li><a href="https://blackfalcondata.com">blackfalcondata.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="foot-copy">&copy; 2025 BlackFalconData. All rights reserved.</span>
+      <span class="foot-status">
+        SYSTEM_STATUS: <span class="status-ok">OPERATIONAL</span>
+        &nbsp;&nbsp;//&nbsp;&nbsp;
+        <span id="clock">00:00:00</span> UTC
+      </span>
+    </div>
+  </footer>
+
+</div><!-- /.wrap -->
+
+<script>
+/* ── Canvas particle network ─────────────────────────────────── */
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+const COUNT  = 75;
+const DIST   = 180;
+let W, H, particles = [];
+
+// Slightly more particles spawn on the right 60% of the canvas
+function mkParticle() {
+  const rightBias = Math.random() < 0.6;
+  return {
+    x:    rightBias ? W * 0.4 + Math.random() * W * 0.6 : Math.random() * W * 0.65,
+    y:    Math.random() * H,
+    vx:   (Math.random() - 0.5) * 0.35,
+    vy:   (Math.random() - 0.5) * 0.35,
+    size: Math.random() * 1.5 + 0.8,
+    opacity: Math.random() * 0.5 + 0.3,
+  };
+}
+
+function init() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  particles = Array.from({ length: COUNT }, mkParticle);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > W) p.vx *= -1;
+    if (p.y < 0 || p.y > H) p.vy *= -1;
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(100,180,255,${p.opacity})`;
+    ctx.fill();
+
+    // Connections
+    for (let j = i + 1; j < particles.length; j++) {
+      const q  = particles[j];
+      const dx = p.x - q.x, dy = p.y - q.y;
+      const d  = Math.sqrt(dx * dx + dy * dy);
+      if (d < DIST) {
+        const alpha = (1 - d / DIST) * 0.12;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.strokeStyle = `rgba(100,180,255,${alpha})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', init);
+init(); draw();
+
+/* ── Data stream effect ──────────────────────────────────────── */
+const streams = {
+  'stream-1': [
+    'FEED:job_market_de   >> 12,441 records   >> CURRENT',
+    'FEED:job_market_gb   >> 8,203 records    >> CURRENT',
+    'FEED:job_market_in   >> 47,310 records   >> CURRENT',
+    'FEED:job_market_au   >> 9,114 records    >> CURRENT',
+    'FEED:job_market_us   >> 19,882 records   >> CURRENT',
+    'FIELD:salary_min     >> 1,834 populated  >> MAPPED',
+    'FIELD:salary_max     >> 1,812 populated  >> MAPPED',
+    'FIELD:location       >> 12,439 populated >> MAPPED',
+    'FIELD:job_type       >> 11,900 populated >> MAPPED',
+    'FIELD:contact_email  >> 642 populated    >> MAPPED',
+    'FIELD:description    >> 8,201 populated  >> MAPPED',
+    'API:GET /jobs/de     >> 12ms             >> 200 OK',
+    'API:GET /jobs/gb     >> 18ms             >> 200 OK',
+    'MCP:tool_call        >> job_search(DE)   >> 200 records',
+    'MCP:tool_call        >> job_search(GB)   >> 150 records',
+    'SCHEMA:v2.1.4        >> 48 fields        >> VALID',
+    'DELTA:new_records    >> 311 today        >> INDEXED',
+    'DELTA:changed        >> 84 today         >> INDEXED',
+    'FEED:job_market_fr   >> 6,884 records    >> CURRENT',
+    'FIELD:is_remote      >> 4,201 populated  >> MAPPED',
+  ],
+  'stream-2': [
+    'FEED:automotive_de   >> 34,112 listings  >> CURRENT',
+    'FEED:automotive_dk   >> 18,774 listings  >> CURRENT',
+    'FEED:real_estate_at  >> 22,098 listings  >> CURRENT',
+    'FEED:real_estate_es  >> 41,330 listings  >> CURRENT',
+    'FIELD:price_eur      >> 34,100 populated >> MAPPED',
+    'FIELD:mileage_km     >> 18,320 populated >> MAPPED',
+    'FIELD:year           >> 33,990 populated >> MAPPED',
+    'FIELD:fuel_type      >> 18,003 populated >> MAPPED',
+    'FIELD:dealer_name    >> 14,882 populated >> MAPPED',
+    'FIELD:price_per_m2   >> 21,884 populated >> MAPPED',
+    'API:GET /auto/de     >> 15ms             >> 200 OK',
+    'API:GET /realestate  >> 22ms             >> 200 OK',
+    'MCP:tool_call        >> search_listings  >> 500 records',
+    'MCP:tool_call        >> price_history    >> DE, DK, AT',
+    'SCHEMA:v1.8.2        >> 52 fields        >> VALID',
+    'DEDUP:listing_hash   >> 12 removed       >> CLEAN',
+    'DELTA:new_records    >> 2,441 today      >> INDEXED',
+    'FEED:classifieds_dk  >> 9,441 listings   >> CURRENT',
+    'FEED:automotive_at   >> 28,003 listings  >> CURRENT',
+    'FIELD:contact_phone  >> 8,112 populated  >> MAPPED',
+  ],
+};
+
+function initStream(id) {
+  const el   = document.getElementById(id);
+  const pool = streams[id];
+  let idx    = 0;
+
+  // Seed with initial lines
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement('div');
+    d.textContent = pool[(idx++) % pool.length];
+    d.style.opacity = (0.2 + Math.random() * 0.45).toFixed(2);
+    el.appendChild(d);
+  }
+
+  setInterval(() => {
+    el.removeChild(el.firstChild);
+    const d = document.createElement('div');
+    d.textContent = pool[(idx++) % pool.length];
+    d.style.opacity = (0.5 + Math.random() * 0.4).toFixed(2);
+    el.appendChild(d);
+  }, 480);
+}
+
+initStream('stream-1');
+initStream('stream-2');
+
+/* ── UTC clock ───────────────────────────────────────────────── */
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    [n.getUTCHours(), n.getUTCMinutes(), n.getUTCSeconds()]
+      .map(v => String(v).padStart(2,'0')).join(':');
+}
+setInterval(tick, 1000); tick();
+</script>
 
 </body>
 </html>
