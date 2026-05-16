@@ -10,12 +10,11 @@ interface Env {
   RESEND_API_KEY: string;
 }
 
-// NOTE: Resend's onboarding@resend.dev sender can only deliver to the
-// Resend account owner's email until a custom domain is verified. Once
-// blackfalcondata.com is verified at resend.com/domains, switch FROM_EMAIL
-// to noreply@blackfalcondata.com and TO_EMAIL to contact@blackfalcondata.com.
-const TO_EMAIL = 'nlykke2@hotmail.com';
-const FROM_EMAIL = 'BlackFalconData Contact <onboarding@resend.dev>';
+// blackfalcondata.com is verified on Resend (us-east-1) so we can send
+// from our own domain to any recipient. Mail is forwarded to gmail via
+// the blackfalcondata.com email forwarding setup.
+const TO_EMAIL = 'nicolailykke@gmail.com';
+const FROM_EMAIL = 'BlackFalconData <noreply@blackfalcondata.com>';
 
 const INQUIRY_LABELS: Record<string, string> = {
   custom_build: 'Custom scraper build',
