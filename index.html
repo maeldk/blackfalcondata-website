@@ -3451,12 +3451,9 @@
     <h2>Got a scraper you need built?</h2>
     <p>Send us the source URL, the fields you need, and any deadline. We respond within 24 hours with feasibility, scope and timeline &mdash; no commitment, no upsell. If we can&rsquo;t build it, we&rsquo;ll say so.</p>
 
-    <form class="contact-form" id="contact-form" novalidate>
-      <!-- Web3Forms config: get your free access key at https://web3forms.com (zero backend, sends to your inbox) -->
-      <input type="hidden" name="access_key" value="REPLACE_WITH_YOUR_WEB3FORMS_ACCESS_KEY" />
-      <input type="hidden" name="subject" value="New inquiry from blackfalcondata.com" />
-      <input type="hidden" name="from_name" value="BlackFalconData Website" />
-      <input type="checkbox" name="botcheck" class="botcheck" tabindex="-1" autocomplete="off" />
+    <form class="contact-form" id="contact-form" action="/api/contact" method="POST" novalidate>
+      <!-- Honeypot — bots fill, humans don't see -->
+      <input type="text" name="botcheck" class="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
       <div class="field full">
         <label for="cf-type">What do you need<span class="req">*</span></label>
@@ -4036,7 +4033,7 @@ setInterval(tick, 1000); tick();
   setInterval(tick, 30 * 1000);
 })();
 
-/* ── Contact form (Web3Forms) ────────────────────────────────── */
+/* ── Contact form → /api/contact (Cloudflare Pages Function + Resend) ─ */
 (function () {
   const form = document.getElementById('contact-form');
   if (!form) return;
@@ -4047,30 +4044,25 @@ setInterval(tick, 1000); tick();
     e.preventDefault();
     if (!form.reportValidity()) return;
 
-    const key = form.elements['access_key'].value;
-    if (!key || key.startsWith('REPLACE_')) {
-      status.innerHTML = '<span class="err">Form not configured — email contact@blackfalcondata.com</span>';
-      return;
-    }
-
     btn.disabled = true;
     const originalLabel = btn.textContent;
     btn.textContent = 'Sending…';
     status.textContent = '';
 
     try {
-      const res = await fetch('https://api.web3forms.com/submit', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
         body: new FormData(form),
       });
-      const json = await res.json();
-      if (json.success) {
+      let json;
+      try { json = await res.json(); } catch { json = {}; }
+      if (res.ok && json.success) {
         form.reset();
-        status.innerHTML = '<span class="ok">Thanks — we\'ll reply within one business day.</span>';
+        status.innerHTML = '<span class="ok">' + (json.message || 'Thanks — we\'ll reply within one business day.') + '</span>';
         btn.textContent = 'Message sent';
       } else {
-        status.innerHTML = '<span class="err">' + (json.message || 'Failed to send.') + ' Try email instead.</span>';
+        const msg = json.message || 'Could not send. Try emailing contact@blackfalcondata.com directly.';
+        status.innerHTML = '<span class="err">' + msg + '</span>';
         btn.disabled = false;
         btn.textContent = originalLabel;
       }
