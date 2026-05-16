@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Not on this site · BlackFalconData</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/Logo_BFD-removebg-preview.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0c10; --text: #e2e8f0; --text-2: #94a3b8; --text-3: #4b5563;
+      --blue: #64b4ff; --amber: #ffb43c;
+      --border: rgba(255,255,255,0.08);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); line-height: 1.6;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 6%;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .wrap { position: relative; z-index: 1; max-width: 640px; }
+    .eyebrow {
+      font-family: var(--mono); font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 24px;
+    }
+    .code {
+      font-family: var(--mono); font-size: 7rem; font-weight: 400;
+      color: var(--text); letter-spacing: -0.04em;
+      line-height: 1; margin-bottom: 24px;
+      background: linear-gradient(160deg, #fff 30%, rgba(255,255,255,0.4));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    h1 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700; letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+    p { color: var(--text-2); font-size: 1rem; max-width: 540px; margin-bottom: 32px; }
+    .btn-row { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block; padding: 12px 28px;
+      border-radius: 4px; text-decoration: none;
+      font-size: 0.9rem; font-weight: 600;
+      transition: background .2s, border-color .2s, color .2s, transform .15s;
+    }
+    .btn-solid { background: #fff; color: #000; border: none; }
+    .btn-solid:hover { background: var(--blue); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--text-2);
+    }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--text); }
+    .ascii {
+      font-family: var(--mono); font-size: 0.72rem;
+      color: var(--text-3); margin-top: 48px;
+      white-space: pre;
+      letter-spacing: 0.02em;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div class="wrap">
+    <div class="eyebrow">// 404 · NOT ON THIS SITE</div>
+    <div class="code">404</div>
+    <h1>This page didn't make it to production.</h1>
+    <p>The URL you followed doesn't exist on blackfalcondata.com. Maybe it was retired, maybe the link is wrong, maybe we never built it. Either way — here's the way back.</p>
+    <div class="btn-row">
+      <a class="btn btn-solid" href="/">Back to site &rarr;</a>
+      <a class="btn btn-ghost" href="/#catalog">Browse the catalog &rarr;</a>
+      <a class="btn btn-ghost" href="/#contact">Commission a build &rarr;</a>
+    </div>
+    <div class="ascii">// curl -s blackfalcondata.com/this-url
+// HTTP/2 404 Not Found
+// content-length: 0
+// retry: visit blackfalcondata.com/</div>
+  </div>
+
+  <script>
+    // Reuse the particle network from the main site for visual continuity
+    const c = document.getElementById('bg');
+    const ctx = c.getContext('2d');
+    let W, H, particles = [];
+    function init() {
+      W = c.width = innerWidth; H = c.height = innerHeight;
+      particles = Array.from({length: 60}, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 1.5 + 0.6, opacity: Math.random() * 0.5 + 0.3,
+      }));
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(100,180,255,${p.opacity})`;
+        ctx.fill();
+        for (let j = i + 1; j < particles.length; j++) {
+          const q = particles[j];
+          const dx = p.x - q.x, dy = p.y - q.y;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          if (d < 180) {
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = `rgba(100,180,255,${(1 - d/180) * 0.12})`;
+            ctx.lineWidth = 0.6; ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    addEventListener('resize', init);
+    init(); draw();
+  </script>
+</body>
+</html>
