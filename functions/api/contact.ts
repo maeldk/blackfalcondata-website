@@ -10,7 +10,11 @@ interface Env {
   RESEND_API_KEY: string;
 }
 
-const TO_EMAIL = 'contact@blackfalcondata.com';
+// NOTE: Resend's onboarding@resend.dev sender can only deliver to the
+// Resend account owner's email until a custom domain is verified. Once
+// blackfalcondata.com is verified at resend.com/domains, switch FROM_EMAIL
+// to noreply@blackfalcondata.com and TO_EMAIL to contact@blackfalcondata.com.
+const TO_EMAIL = 'nlykke2@hotmail.com';
 const FROM_EMAIL = 'BlackFalconData Contact <onboarding@resend.dev>';
 
 const INQUIRY_LABELS: Record<string, string> = {
